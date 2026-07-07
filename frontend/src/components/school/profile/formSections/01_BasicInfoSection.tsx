@@ -426,9 +426,8 @@ export default function BasicInfoSection({
               </select>
             </FormField>
 
-            {/* Board Affiliation — grouped select + conditional stateBoardName */}
             {/* Board Affiliation */}
-            <FormField label="Board Affiliation" className="sm:col-span-2">
+            <FormField label="Board Affiliation">
               <select
                 className={selectClass}
                 value={

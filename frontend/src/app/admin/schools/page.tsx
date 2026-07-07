@@ -121,7 +121,7 @@ async function SchoolsTable({
                     <TableCell>
                       {school.board === "STATE_BOARD"
                         ? school.stateBoardName || "State Board"
-                        : school.board.replace("_", " ")}
+                        : school.board?.replaceAll("_", " ") || "N/A"}
                     </TableCell>
                     <TableCell>{school.owner.email}</TableCell>
                     <TableCell>

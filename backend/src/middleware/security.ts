@@ -56,7 +56,7 @@ function getAllowedOrigins(): string[] {
 }
 
 export const corsMiddleware = cors({
-  origin(origin, callback) {
+   origin(origin, callback) {
     const allowedOrigins = getAllowedOrigins();
 
     if (!origin) {
@@ -69,6 +69,7 @@ export const corsMiddleware = cors({
       return;
     }
 
+    console.error(`[CORS] Blocked origin: "${origin}". Allowed: ${JSON.stringify(allowedOrigins)}`);
     callback(new Error("Origin not allowed by CORS policy"));
   },
   methods: [...ALLOWED_METHODS],
