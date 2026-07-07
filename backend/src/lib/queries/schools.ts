@@ -1,5 +1,4 @@
-import type { Prisma } from "../../../generated/prisma";
-
+import type { Prisma, BoardType, SchoolType, MediumType } from "../../../generated/prisma";
 /** Fields shown on SchoolCard */
 export const schoolListSelect = {
   id: true,
@@ -247,16 +246,15 @@ export function buildSchoolListWhere(filters: {
 
   const boards = normalizeBoardFilters(filters.board);
   if (boards.length > 0) {
-    where.board = { in: boards as Prisma.EnumBoardTypeFilter["in"] };
+    where.board = { in: boards as BoardType[] };   // ← changed
   }
 
   if (filters.schoolType) {
-    where.schoolType =
-      filters.schoolType as Prisma.EnumSchoolTypeFilter["equals"];
+    where.schoolType = filters.schoolType as SchoolType;   // ← changed
   }
 
   if (filters.medium) {
-    where.medium = filters.medium as Prisma.EnumMediumTypeFilter["equals"];
+    where.medium = filters.medium as MediumType;   // ← changed
   }
 
   if (filters.schoolCategory) {
@@ -285,9 +283,9 @@ export function buildSchoolListWhere(filters: {
 
     where.AND = where.AND
       ? [
-          ...(Array.isArray(where.AND) ? where.AND : [where.AND]),
-          localityOrAddress,
-        ]
+        ...(Array.isArray(where.AND) ? where.AND : [where.AND]),
+        localityOrAddress,
+      ]
       : [localityOrAddress];
   }
 

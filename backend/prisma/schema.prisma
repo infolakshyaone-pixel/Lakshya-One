@@ -83,12 +83,12 @@ model School {
   longitude                Float?
   locality                 String?            
   coordinatesApproximate   Boolean             @default(false)  
-  board                    BoardType
-  schoolType               SchoolType
-  medium                   MediumType
+  board                    BoardType?          
+  schoolType               SchoolType?         
+  medium                   MediumType?         
   mediumOther String?
-  classesFrom              Int
-  classesTo                Int
+  classesFrom              Int?
+  classesTo                Int?
   totalStudents            Int?
   establishedYear          Int?
   phone                    String

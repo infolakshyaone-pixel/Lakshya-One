@@ -2,12 +2,12 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
   Menu,
   X,
-  GraduationCap,
   Heart,
   LayoutDashboard,
   ShieldCheck,
@@ -100,7 +100,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-blue-800 bg-blue-900 shadow-md">
+    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm">
       <nav
         className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
         aria-label="Main navigation"
@@ -109,15 +109,16 @@ export default function Navbar() {
           <Link
             href="/"
             onClick={close}
-            className="group flex shrink-0 items-center gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+            className="group flex shrink-0 items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EF9F27]"
           >
-            <span className="rounded-xl bg-amber-400 p-2 shadow-amber transition-transform group-hover:scale-105">
-              <GraduationCap className="h-5 w-5 text-white" aria-hidden />
-            </span>
-
-            <span className="font-heading text-xl font-bold tracking-tight text-white">
-              Lakshya One
-            </span>
+            <Image
+              src="/logo.png"
+              alt="Lakshya One"
+              width={220}
+              height={60}
+              priority
+              className="h-12 w-auto transition-transform group-hover:scale-105 sm:h-14"
+            />
           </Link>
 
           <div className="hidden items-center gap-1 md:flex">
@@ -130,8 +131,8 @@ export default function Navbar() {
                   href={link.href}
                   className={`rounded-xl px-3 py-2 font-heading text-sm font-semibold transition-colors ${
                     active
-                      ? "bg-white/15 text-white"
-                      : "text-blue-200 hover:bg-white/10 hover:text-white"
+                      ? "bg-[#185FA5]/10 text-[#185FA5]"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-[#185FA5]"
                   }`}
                 >
                   {link.label}
@@ -139,11 +140,11 @@ export default function Navbar() {
               );
             })}
 
-            <span className="mx-1 h-5 w-px bg-blue-200/30" aria-hidden />
+            <span className="mx-1 h-5 w-px bg-gray-200" aria-hidden />
 
             {isLoading && !isAuthenticated ? (
               <div
-                className="ml-2 h-9 w-28 animate-pulse rounded-xl bg-white/10"
+                className="ml-2 h-9 w-28 animate-pulse rounded-xl bg-gray-100"
                 aria-hidden
               />
             ) : (
@@ -157,8 +158,8 @@ export default function Navbar() {
                       href={link.href}
                       className={`flex items-center gap-1.5 rounded-xl px-3 py-2 font-heading text-sm font-semibold transition-colors ${
                         active
-                          ? "bg-white/15 text-white"
-                          : "text-blue-200 hover:bg-white/10 hover:text-white"
+                          ? "bg-[#185FA5]/10 text-[#185FA5]"
+                          : "text-gray-600 hover:bg-gray-100 hover:text-[#185FA5]"
                       }`}
                     >
                       {link.icon}
@@ -174,7 +175,7 @@ export default function Navbar() {
                       <img
                         src={session.user.image}
                         alt={session.user.name ?? "User"}
-                        className="h-8 w-8 rounded-full border-2 border-white/30"
+                        className="h-8 w-8 rounded-full border-2 border-gray-200"
                       />
                     ) : null}
 
@@ -183,7 +184,7 @@ export default function Navbar() {
                       size="sm"
                       onClick={handleLogout}
                       disabled={loggingOut}
-                      className="flex items-center gap-1.5 rounded-xl border border-blue-200/30 px-3 font-heading text-sm font-semibold text-blue-200 hover:bg-white/10 hover:text-white disabled:opacity-60"
+                      className="flex items-center gap-1.5 rounded-xl border border-gray-200 px-3 font-heading text-sm font-semibold text-gray-600 hover:bg-gray-100 hover:text-[#185FA5] disabled:opacity-60"
                     >
                       {loggingOut ? (
                         <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -199,7 +200,7 @@ export default function Navbar() {
                       asChild
                       variant="ghost"
                       size="sm"
-                      className="rounded-xl border border-blue-200/40 px-4 font-heading text-sm font-semibold text-white hover:bg-white/10"
+                      className="rounded-xl bg-[#185FA5] px-4 font-heading text-sm font-semibold text-white shadow-sm hover:bg-[#144e89]"
                     >
                       <Link
                         href={AUTH_ROUTES.parentLogin}
@@ -214,7 +215,7 @@ export default function Navbar() {
                       asChild
                       variant="ghost"
                       size="sm"
-                      className="rounded-xl px-3 font-heading text-sm font-semibold text-blue-200 hover:bg-white/10 hover:text-white"
+                      className="rounded-xl px-3 font-heading text-sm font-semibold text-gray-600 hover:bg-gray-100 hover:text-[#185FA5]"
                     >
                       <Link
                         href={AUTH_ROUTES.schoolLogin}
@@ -232,7 +233,7 @@ export default function Navbar() {
 
           <button
             type="button"
-            className="rounded-xl p-2 text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 md:hidden"
+            className="rounded-xl p-2 text-gray-700 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EF9F27] md:hidden"
             onClick={() => setMobileOpen((open) => !open)}
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
@@ -246,7 +247,7 @@ export default function Navbar() {
         </div>
 
         {mobileOpen ? (
-          <div className="flex flex-col gap-1 border-t border-blue-200/20 py-3 pb-4 md:hidden">
+          <div className="flex flex-col gap-1 border-t border-gray-200 py-3 pb-4 md:hidden">
             {PUBLIC_NAV_LINKS.map((link) => (
               <MobileLink
                 key={link.href}
@@ -258,11 +259,11 @@ export default function Navbar() {
               </MobileLink>
             ))}
 
-            <div className="mx-3 my-1 h-px bg-blue-200/20" aria-hidden />
+            <div className="mx-3 my-1 h-px bg-gray-200" aria-hidden />
 
             {isLoading && !isAuthenticated ? (
               <div
-                className="mx-3 mt-2 h-10 animate-pulse rounded-xl bg-white/10"
+                className="mx-3 mt-2 h-10 animate-pulse rounded-xl bg-gray-100"
                 aria-hidden
               />
             ) : (
@@ -282,7 +283,7 @@ export default function Navbar() {
                 {isAuthenticated ? (
                   <>
                     {session?.user?.name ? (
-                      <p className="px-3 py-1 font-body text-xs text-blue-200">
+                      <p className="px-3 py-1 font-body text-xs text-gray-500">
                         {session.user.name}
                       </p>
                     ) : null}
@@ -291,7 +292,7 @@ export default function Navbar() {
                       type="button"
                       onClick={handleLogout}
                       disabled={loggingOut}
-                      className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-left font-heading text-sm font-semibold text-blue-200 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-60"
+                      className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-left font-heading text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 hover:text-[#185FA5] disabled:opacity-60"
                     >
                       {loggingOut ? (
                         <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -306,7 +307,7 @@ export default function Navbar() {
                     <Button
                       asChild
                       variant="ghost"
-                      className="justify-start rounded-xl border border-blue-200/40 font-heading font-semibold text-white hover:bg-white/10"
+                      className="justify-start rounded-xl bg-[#185FA5] font-heading font-semibold text-white shadow-sm hover:bg-[#144e89]"
                     >
                       <Link
                         href={AUTH_ROUTES.parentLogin}
@@ -321,7 +322,7 @@ export default function Navbar() {
                     <Button
                       asChild
                       variant="ghost"
-                      className="justify-start rounded-xl font-heading font-semibold text-blue-200 hover:bg-white/10 hover:text-white"
+                      className="justify-start rounded-xl font-heading font-semibold text-gray-600 hover:bg-gray-100 hover:text-[#185FA5]"
                     >
                       <Link
                         href={AUTH_ROUTES.schoolLogin}
@@ -364,8 +365,8 @@ function MobileLink({
       onClick={onClick}
       className={`flex items-center gap-2 rounded-xl px-3 py-2.5 font-heading text-sm font-semibold transition-colors ${
         active
-          ? "bg-white/15 text-white"
-          : "text-blue-200 hover:bg-white/10 hover:text-white"
+          ? "bg-[#185FA5]/10 text-[#185FA5]"
+          : "text-gray-600 hover:bg-gray-100 hover:text-[#185FA5]"
       }`}
     >
       {icon}

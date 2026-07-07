@@ -25,14 +25,14 @@ export interface SchoolCardProps {
   slug: string;
   city: string;
   state: string;
-  board: "CBSE" | "ICSE" | "IB" | "IGCSE" | "NIOS" | "STATE_BOARD" | "OTHER";
+  board: "CBSE" | "ICSE" | "IB" | "IGCSE" | "NIOS" | "STATE_BOARD" | "OTHER" | null;
   stateBoardName?: string | null;
-  schoolType: "BOYS" | "GIRLS" | "CO_ED";
-  medium: "HINDI" | "ENGLISH" | "BOTH" | "OTHER";
+  schoolType: "BOYS" | "GIRLS" | "CO_ED" | null;
+  medium: "HINDI" | "ENGLISH" | "BOTH" | "OTHER" | null;
   mediumOther?: string | null;
   managementType?: string | null;
-  classesFrom: number;
-  classesTo: number;
+  classesFrom: number | null;
+  classesTo: number | null;
   classesOffered?: string[] | null;
   tuitionFeeMonthly?: number | null;
   logoUrl?: string | null;
@@ -42,7 +42,7 @@ export interface SchoolCardProps {
   isFeatured?: boolean;
 }
 
-const BOARD_LABELS: Record<SchoolCardProps["board"], string> = {
+const BOARD_LABELS: Record<Exclude<SchoolCardProps["board"], null>, string> = {
   CBSE:        "CBSE",
   ICSE:        "ICSE",
   IB:          "IB",
@@ -52,13 +52,13 @@ const BOARD_LABELS: Record<SchoolCardProps["board"], string> = {
   OTHER:       "Other",
 };
 
-const TYPE_LABELS: Record<SchoolCardProps["schoolType"], string> = {
+const TYPE_LABELS: Record<Exclude<SchoolCardProps["schoolType"], null>, string> = {
   BOYS:  "Boys",
   GIRLS: "Girls",
   CO_ED: "Co-Ed",
 };
 
-const MEDIUM_LABELS: Record<SchoolCardProps["medium"], string> = {
+const MEDIUM_LABELS: Record<Exclude<SchoolCardProps["medium"], null>, string> = {
   HINDI:   "Hindi",
   ENGLISH: "English",
   BOTH:    "Bilingual",
@@ -69,6 +69,7 @@ function getBoardLabel(
   board: SchoolCardProps["board"],
   stateBoardName?: string | null,
 ): string {
+  if (!board) return "Board not set";
   if (board === "STATE_BOARD" && stateBoardName) return stateBoardName;
   return BOARD_LABELS[board];
 }
@@ -77,6 +78,7 @@ function getMediumLabel(
   medium: SchoolCardProps["medium"],
   mediumOther?: string | null,
 ): string {
+  if (!medium) return "Medium not set";
   if (medium === "OTHER" && mediumOther) return mediumOther;
   return MEDIUM_LABELS[medium];
 }
@@ -95,30 +97,28 @@ function getInitials(name: string): string {
 const CLASS_ORDER = [
   'Daycare / Creche', 'Toddler', 'Play Group', 'Pre-Nursery',
   'Nursery', 'LKG', 'UKG',
-  'Class 1','Class 2','Class 3','Class 4','Class 5','Class 6',
-  'Class 7','Class 8','Class 9','Class 10','Class 11','Class 12',
+  'Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6',
+  'Class 7', 'Class 8', 'Class 9', 'Class 10', 'Class 11', 'Class 12',
 ];
 
 function formatClassRange(
   classesOffered: string[] | null | undefined,
-  classesFrom: number,
-  classesTo: number,
+  classesFrom: number | null,
+  classesTo: number | null,
 ): string {
   if (classesOffered && classesOffered.length > 0) {
-    // Filter to only known valid values — discard garbage like "60m"
     const valid = classesOffered.filter((c) => CLASS_ORDER.includes(c));
-
     if (valid.length > 0) {
       const sorted = [...valid].sort(
         (a, b) => CLASS_ORDER.indexOf(a) - CLASS_ORDER.indexOf(b),
       );
       const first = sorted[0];
-      const last  = sorted[sorted.length - 1];
+      const last = sorted[sorted.length - 1];
       if (first === last) return first;
       return `${first} – ${last}`;
     }
   }
-  // Fallback: classesFrom/classesTo numeric fields
+  if (classesFrom == null || classesTo == null) return "Classes not set";
   return `Class ${classesFrom} – Class ${classesTo}`;
 }
 
@@ -166,7 +166,7 @@ function SchoolCardComponent(props: SchoolCardProps) {
     isFeatured,
   } = props;
 
-  const reduceMotion    = useReducedMotion();
+  const reduceMotion = useReducedMotion();
   const optimizedLogoUrl = optimizeCloudinaryUrl(logoUrl, { width: 128 });
   const [isInCompare, setIsInCompare] = useState(false);
 
@@ -186,7 +186,7 @@ function SchoolCardComponent(props: SchoolCardProps) {
 
   function handleCompareClick() {
     const currentSchools = readCompareSchools();
-    const alreadyAdded   = currentSchools.some((school) => school.id === id);
+    const alreadyAdded = currentSchools.some((school) => school.id === id);
 
     if (alreadyAdded) {
       writeCompareSchools(currentSchools.filter((school) => school.id !== id));
@@ -201,7 +201,7 @@ function SchoolCardComponent(props: SchoolCardProps) {
     setIsInCompare(true);
   }
 
-  const boardLabel  = getBoardLabel(board, stateBoardName);
+  const boardLabel = getBoardLabel(board, stateBoardName);
   const mediumLabel = getMediumLabel(medium, mediumOther);
 
   const card = (
@@ -267,7 +267,7 @@ function SchoolCardComponent(props: SchoolCardProps) {
               {boardLabel}
             </span>
             <span className="badge-premium bg-blue-50 text-blue-700 border-blue-100">
-              {TYPE_LABELS[schoolType]}
+              {schoolType ? TYPE_LABELS[schoolType] : "Type not set"}
             </span>
             <span className="badge-premium bg-gray-50 text-gray-600 border-gray-100">
               {mediumLabel}

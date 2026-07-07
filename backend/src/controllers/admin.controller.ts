@@ -701,12 +701,13 @@ export const deleteUserDirect = async (req: AuthRequest, res: Response) => {
 };
 
 // POST /api/admin/add-school
+// POST /api/admin/add-school
 export const addSchoolDirect = async (req: AuthRequest, res: Response) => {
   if (!req.user?.id) {
     throw Errors.Unauthorized("Authentication required");
   }
 
-  const { ownerEmail, ownerName, ownerPassword, name, phone } = req.body;
+  const { ownerEmail, ownerPassword, name, phone } = req.body;
 
   if (!ownerEmail || !name || !phone) {
     throw Errors.BadRequest("ownerEmail, name, and phone are required");
@@ -750,7 +751,7 @@ export const addSchoolDirect = async (req: AuthRequest, res: Response) => {
 
     owner = await prisma.user.create({
       data: {
-        name: ownerName || ownerEmail.split("@")[0],
+        name: name.trim(),        // ← school name = owner name, ownerName hataya
         email: ownerEmail,
         password: hashedPassword,
         role: "SCHOOL_ADMIN",
@@ -771,14 +772,10 @@ export const addSchoolDirect = async (req: AuthRequest, res: Response) => {
       name: name.trim(),
       slug,
       phone,
-      address: "",
-      city: "",
-      state: "",
-      board: "OTHER",
-      schoolType: "CO_ED",
-      medium: "ENGLISH",
-      classesFrom: 1,
-      classesTo: 12,
+      address: "",              // ⚠️ still hardcoded — see note above
+      city: "",                 // ⚠️ still hardcoded — see note above
+      state: "",                // ⚠️ still hardcoded — see note above
+      // board, schoolType, medium, classesFrom, classesTo — REMOVED, no fake default
       description: null,
       pincode: null,
       email: null,
