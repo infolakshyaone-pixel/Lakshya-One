@@ -374,8 +374,8 @@ function getInitials(name: string) {
 const CLASS_ORDER_DETAIL = [
   'Daycare / Creche', 'Toddler', 'Play Group', 'Pre-Nursery',
   'Nursery', 'LKG', 'UKG',
-  'Class 1','Class 2','Class 3','Class 4','Class 5','Class 6',
-  'Class 7','Class 8','Class 9','Class 10','Class 11','Class 12',
+  'Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6',
+  'Class 7', 'Class 8', 'Class 9', 'Class 10', 'Class 11', 'Class 12',
 ];
 
 function formatDetailClassRange(
@@ -390,7 +390,7 @@ function formatDetailClassRange(
         (a, b) => CLASS_ORDER_DETAIL.indexOf(a) - CLASS_ORDER_DETAIL.indexOf(b),
       );
       const first = sorted[0];
-      const last  = sorted[sorted.length - 1];
+      const last = sorted[sorted.length - 1];
       if (first === last) return first;
       return `${first} – ${last}`;
     }
@@ -641,15 +641,15 @@ export default async function SchoolDetailPage({
 
   const nearbySchools = hasCoordinates(school)
     ? await fetchNearbySchools(
-        {
-          lat: school.latitude as number,
-          lng: school.longitude as number,
-          radius: 5,
-          limit: 4,
-          excludeId: school.id,
-        },
-        { revalidate: 300 },
-      )
+      {
+        lat: school.latitude as number,
+        lng: school.longitude as number,
+        radius: 5,
+        limit: 4,
+        excludeId: school.id,
+      },
+      { revalidate: 300 },
+    )
     : [];
 
   const structuredData = [
@@ -693,9 +693,9 @@ export default async function SchoolDetailPage({
   const heroStats = [
     school.totalStudents
       ? {
-          label: "Students",
-          value: school.totalStudents.toLocaleString("en-IN"),
-        }
+        label: "Students",
+        value: school.totalStudents.toLocaleString("en-IN"),
+      }
       : null,
     school.totalTeachers
       ? { label: "Teachers", value: String(school.totalTeachers) }
@@ -746,11 +746,10 @@ export default async function SchoolDetailPage({
 
         {/* Overlay — dark gradient always present, stronger when image exists */}
         <div
-          className={`absolute inset-0 ${
-            school.coverImageUrl
+          className={`absolute inset-0 ${school.coverImageUrl
               ? "bg-gradient-to-b from-blue-900/70 via-blue-900/80 to-blue-900/95"
               : ""
-          }`}
+            }`}
         />
 
         {/* All hero content sits above overlay */}
@@ -1020,14 +1019,14 @@ export default async function SchoolDetailPage({
               {/* Academics custom fields */}
               {getSectionCustomFields(school.customFields, "academics").length >
                 0 && (
-                <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {getSectionCustomFields(school.customFields, "academics").map(
-                    (f) => (
-                      <InfoTile key={f.id} label={f.label} value={f.value} />
-                    ),
-                  )}
-                </div>
-              )}
+                  <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {getSectionCustomFields(school.customFields, "academics").map(
+                      (f) => (
+                        <InfoTile key={f.id} label={f.label} value={f.value} />
+                      ),
+                    )}
+                  </div>
+                )}
             </SectionCard>
           )}
 
@@ -1189,27 +1188,27 @@ export default async function SchoolDetailPage({
               {/* Fee custom fields */}
               {getSectionCustomFields(school.customFields, "fees").length >
                 0 && (
-                <div className="mt-4 space-y-2">
-                  <p className="font-heading font-semibold text-label text-gray-500 mb-2">
-                    Additional Fee Details
-                  </p>
-                  {getSectionCustomFields(school.customFields, "fees").map(
-                    (f) => (
-                      <div
-                        key={f.id}
-                        className="flex justify-between py-2 border-b border-gray-100"
-                      >
-                        <span className="font-body text-body text-gray-700">
-                          {f.label}
-                        </span>
-                        <span className="font-heading font-semibold text-body text-gray-800">
-                          {f.value}
-                        </span>
-                      </div>
-                    ),
-                  )}
-                </div>
-              )}
+                  <div className="mt-4 space-y-2">
+                    <p className="font-heading font-semibold text-label text-gray-500 mb-2">
+                      Additional Fee Details
+                    </p>
+                    {getSectionCustomFields(school.customFields, "fees").map(
+                      (f) => (
+                        <div
+                          key={f.id}
+                          className="flex justify-between py-2 border-b border-gray-100"
+                        >
+                          <span className="font-body text-body text-gray-700">
+                            {f.label}
+                          </span>
+                          <span className="font-heading font-semibold text-body text-gray-800">
+                            {f.value}
+                          </span>
+                        </div>
+                      ),
+                    )}
+                  </div>
+                )}
             </SectionCard>
           )}
 
@@ -1242,15 +1241,15 @@ export default async function SchoolDetailPage({
               {/* Facilities custom fields */}
               {getSectionCustomFields(school.customFields, "facilities")
                 .length > 0 && (
-                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {getSectionCustomFields(
-                    school.customFields,
-                    "facilities",
-                  ).map((f) => (
-                    <InfoTile key={f.id} label={f.label} value={f.value} />
-                  ))}
-                </div>
-              )}
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {getSectionCustomFields(
+                      school.customFields,
+                      "facilities",
+                    ).map((f) => (
+                      <InfoTile key={f.id} label={f.label} value={f.value} />
+                    ))}
+                  </div>
+                )}
             </SectionCard>
           )}
 
@@ -1275,14 +1274,14 @@ export default async function SchoolDetailPage({
               {/* Sports custom fields */}
               {getSectionCustomFields(school.customFields, "sports").length >
                 0 && (
-                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {getSectionCustomFields(school.customFields, "sports").map(
-                    (f) => (
-                      <InfoTile key={f.id} label={f.label} value={f.value} />
-                    ),
-                  )}
-                </div>
-              )}
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {getSectionCustomFields(school.customFields, "sports").map(
+                      (f) => (
+                        <InfoTile key={f.id} label={f.label} value={f.value} />
+                      ),
+                    )}
+                  </div>
+                )}
             </SectionCard>
           )}
 
@@ -1301,14 +1300,14 @@ export default async function SchoolDetailPage({
               </div>
               {getSectionCustomFields(school.customFields, "programs").length >
                 0 && (
-                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {getSectionCustomFields(school.customFields, "programs").map(
-                    (f) => (
-                      <InfoTile key={f.id} label={f.label} value={f.value} />
-                    ),
-                  )}
-                </div>
-              )}
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {getSectionCustomFields(school.customFields, "programs").map(
+                      (f) => (
+                        <InfoTile key={f.id} label={f.label} value={f.value} />
+                      ),
+                    )}
+                  </div>
+                )}
             </SectionCard>
           )}
 
@@ -1506,15 +1505,15 @@ export default async function SchoolDetailPage({
               {/* Board Results custom fields */}
               {getSectionCustomFields(school.customFields, "boardResults")
                 .length > 0 && (
-                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {getSectionCustomFields(
-                    school.customFields,
-                    "boardResults",
-                  ).map((f) => (
-                    <InfoTile key={f.id} label={f.label} value={f.value} />
-                  ))}
-                </div>
-              )}
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {getSectionCustomFields(
+                      school.customFields,
+                      "boardResults",
+                    ).map((f) => (
+                      <InfoTile key={f.id} label={f.label} value={f.value} />
+                    ))}
+                  </div>
+                )}
             </SectionCard>
           )}
 
@@ -1562,14 +1561,14 @@ export default async function SchoolDetailPage({
               {/* Hostel custom fields */}
               {getSectionCustomFields(school.customFields, "hostel").length >
                 0 && (
-                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {getSectionCustomFields(school.customFields, "hostel").map(
-                    (f) => (
-                      <InfoTile key={f.id} label={f.label} value={f.value} />
-                    ),
-                  )}
-                </div>
-              )}
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {getSectionCustomFields(school.customFields, "hostel").map(
+                      (f) => (
+                        <InfoTile key={f.id} label={f.label} value={f.value} />
+                      ),
+                    )}
+                  </div>
+                )}
             </SectionCard>
           )}
 
@@ -1814,33 +1813,33 @@ export default async function SchoolDetailPage({
               {(school.admissionCoordinatorName ||
                 school.admissionPhone ||
                 school.admissionEmail) && (
-                <div className="border-t border-gray-100 pt-4 mb-5">
-                  <p className="font-heading font-semibold text-label text-gray-500 mb-2">
-                    Admission Contact
-                  </p>
-                  {school.admissionCoordinatorName && (
-                    <p className="font-body text-body text-gray-800 mb-1">
-                      {school.admissionCoordinatorName}
+                  <div className="border-t border-gray-100 pt-4 mb-5">
+                    <p className="font-heading font-semibold text-label text-gray-500 mb-2">
+                      Admission Contact
                     </p>
-                  )}
-                  {school.admissionPhone && (
-                    <a
-                      href={`tel:${school.admissionPhone}`}
-                      className="block font-body text-body text-blue-600 hover:text-blue-800 mb-1"
-                    >
-                      {school.admissionPhone}
-                    </a>
-                  )}
-                  {school.admissionEmail && (
-                    <a
-                      href={`mailto:${school.admissionEmail}`}
-                      className="block font-body text-body text-blue-600 hover:text-blue-800 truncate"
-                    >
-                      {school.admissionEmail}
-                    </a>
-                  )}
-                </div>
-              )}
+                    {school.admissionCoordinatorName && (
+                      <p className="font-body text-body text-gray-800 mb-1">
+                        {school.admissionCoordinatorName}
+                      </p>
+                    )}
+                    {school.admissionPhone && (
+                      <a
+                        href={`tel:${school.admissionPhone}`}
+                        className="block font-body text-body text-blue-600 hover:text-blue-800 mb-1"
+                      >
+                        {school.admissionPhone}
+                      </a>
+                    )}
+                    {school.admissionEmail && (
+                      <a
+                        href={`mailto:${school.admissionEmail}`}
+                        className="block font-body text-body text-blue-600 hover:text-blue-800 truncate"
+                      >
+                        {school.admissionEmail}
+                      </a>
+                    )}
+                  </div>
+                )}
 
               {admissionCoordinators.length > 0 && (
                 <div className="border-t border-gray-100 pt-4 mb-5">
@@ -2043,7 +2042,7 @@ function NearbySchoolsSection({ schools }: { schools: NearbySchool[] }) {
                 </p>
                 <div className="flex flex-wrap gap-2 mt-2">
                   <span className="px-2 py-0.5 rounded-full bg-white border border-gray-100 text-meta text-gray-600">
-                    {BOARD_LABEL[school.board] ?? school.board}
+                    {school.board ? (BOARD_LABEL[school.board] ?? school.board) : "Board not set"}
                   </span>
                   {typeof school.distanceKm === "number" && (
                     <span className="px-2 py-0.5 rounded-full bg-blue-100 border border-blue-200 text-meta text-blue-700">
@@ -2177,16 +2176,14 @@ function FeeRow({
   return (
     <tr className={highlight ? "bg-blue-50" : ""}>
       <td
-        className={`py-3 font-body text-body ${
-          highlight ? "text-blue-800 font-medium" : "text-gray-800"
-        }`}
+        className={`py-3 font-body text-body ${highlight ? "text-blue-800 font-medium" : "text-gray-800"
+          }`}
       >
         {label}
       </td>
       <td
-        className={`py-3 text-right font-heading font-semibold ${
-          highlight ? "text-blue-600 text-body-lg" : "text-gray-800"
-        }`}
+        className={`py-3 text-right font-heading font-semibold ${highlight ? "text-blue-600 text-body-lg" : "text-gray-800"
+          }`}
       >
         {amount}
       </td>
