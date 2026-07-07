@@ -1,0 +1,410 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../generated/prisma"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model User {
+  id               String            @id @default(cuid())
+  name             String?
+  email            String            @unique
+  emailVerified    DateTime?
+  image            String?
+  phone            String?
+  password         String?
+  otpCode          String?
+  otpExpiry        DateTime?
+  otpVerified      Boolean           @default(false)
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  role             Role              @default(PARENT)
+  tokenVersion     Int               @default(0)   // ← ADD THIS LINE — forces re-login when incremented
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  adminAccessLevel AdminAccessLevel?
+  isSuperAdmin     Boolean           @default(false)
+  accounts         Account[]
+  favourites       Favourite[]
+  inquiries        Inquiry[]         @relation("ParentInquiries")
+  ownedSchools     School[]          @relation("SchoolOwner")
+  sessions         Session[]
+}
+
+model School {
+  id                       String              @id @default(cuid())
+  name                     String
+  slug                     String              @unique
+  description              String?
+  address                  String
+  city                     String
+  state                    String
+  pincode                  String?
+  latitude                 Float?
+  longitude                Float?
+  locality                 String?            
+  coordinatesApproximate   Boolean             @default(false)  
+  board                    BoardType
+  schoolType               SchoolType
+  medium                   MediumType
+  mediumOther String?
+  classesFrom              Int
+  classesTo                Int
+  totalStudents            Int?
+  establishedYear          Int?
+  phone                    String
+  additionalPhones         Json?
+  email                    String?
+  website                  String?
+  logoUrl                  String?
+  rejectionReason          String?
+  status                   SchoolStatus        @default(PENDING)
+  admissionFee             Float?
+  tuitionFeeMonthly        Float?
+  totalAnnualFee           Float?
+  transportFee             Float?
+  hostelFee                Float?
+  ownerId                  String
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+  academicAchievements     String?
+  admissionCoordinatorName String?
+  admissionEmail           String?
+  admissionCoordinators    Json?
+  admissionEndDate         DateTime?
+  admissionOpen            Boolean             @default(false)
+  admissionPhone           String?
+  admissionProcess         String?
+  admissionStartDate       DateTime?
+  affiliationNumber        String?
+  ageCriteria              String?
+  annualEvents             String?
+  averageAnnualFee         Int?
+  awardsRecognitions       String?
+  campusArea               String?
+  class11to12Fee           Int?
+  class1to5Fee             Int?
+  class6to8Fee             Int?
+  class9to10Fee            Int?
+  classesOffered           String[]
+  clubsActivities          String?
+  coverImageUrl            String?
+  culturalActivities       String?
+  educationalTours         String?
+  endTime                  String?
+  facebook                 String?
+  facilitiesList           String[]
+  facilityCustomGroups     Json?
+  gpsTracking              Boolean             @default(false)
+  hasCCTV                  Boolean             @default(false)
+  hasFireSafety            Boolean             @default(false)
+  hasGuards                Boolean             @default(false)
+  hasMedicalRoom           Boolean             @default(false)
+  hasVisitorMgmt           Boolean             @default(false)
+  hostelAvailable          Boolean             @default(false)
+  hostelBoys               Boolean             @default(false)
+  hostelCapacity           Int?
+  hostelGirls              Boolean             @default(false)
+  hostelMess               Boolean             @default(false)
+  instagram                String?
+  libraryBooks             Int?
+  linkedin                 String?
+  managementType           String?
+  mapUrl                   String?
+  mission                  String?
+  prePrimaryFee            Int?
+  principalMessage         String?
+  programsList             String[]
+  qualifiedTeachers        Int?
+  requiredDocuments        String?
+  schoolCategory           String?
+  schoolFormat             String?
+  sportsAchievements       String?
+  sportsList               String[]
+  sportsCustomGroups       Json?
+  startTime                String?
+  streamsOffered           String[]
+  studentTeacherRatio      String?
+  academicCalendar         String? 
+  tagline                  String?
+  totalBuses               Int?
+  totalClassrooms          Int?
+  totalLabs                Int?
+  totalTeachers            Int?
+  totalVehicles            String?
+  trainingPrograms         String?
+  transportAreas           String?
+  transportAvailable       Boolean             @default(false)
+  vision                   String?
+  whatsapp                 String?
+  workingDays              String?
+  languagesOffered         String[]            @default([])
+  recognitionNumber        String?
+  affiliatedSince          String?
+  uniformPolicy            String?
+  canteenAvailable         String?
+  stateBoardName           String?
+  earlyChildhoodFee        Int?
+  socialLinks              Json?
+  youtube                  String?
+  isVisible                Boolean             @default(true)
+  isFeatured               Boolean             @default(false)
+  featuredUntil            DateTime?
+  boardResults             BoardResult[]
+  favourites               Favourite[]
+  inquiries                Inquiry[]
+  scholarships             Scholarship[]
+  owner                    User                @relation("SchoolOwner", fields: [ownerId], references: [id])
+  customFields             SchoolCustomField[]
+  downloads                SchoolDownload[]
+  faqs                     SchoolFAQ[]
+  facilities               SchoolFacility[]
+  images                   SchoolImage[]
+
+  @@index([status, createdAt])
+  @@index([city, status])
+  @@index([state, status])
+  @@index([board, status])
+  @@index([ownerId])
+  @@index([status, isVisible])
+  @@index([isFeatured, status])
+  @@index([latitude, longitude])
+}
+
+model SchoolImage {
+  id        String   @id @default(cuid())
+  schoolId  String
+  url       String
+  caption   String?
+  createdAt DateTime @default(now())
+  category  String?
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+}
+
+model Facility {
+  id      String           @id @default(cuid())
+  name    String           @unique
+  icon    String?
+  schools SchoolFacility[]
+}
+
+model SchoolFacility {
+  schoolId   String
+  facilityId String
+  facility   Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  school     School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@id([schoolId, facilityId])
+}
+
+model SchoolCustomField {
+  id        String @id @default(cuid())
+  schoolId  String
+  section   String
+  label     String
+  value     String
+  fieldType String @default("text")
+  school    School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, section])
+}
+
+model BoardResult {
+  id          String  @id @default(cuid())
+  schoolId    String
+  year        String
+  classLevel  String  @default("CLASS_10")   // "CLASS_10" | "CLASS_12"
+  passPercent String?
+  topperName  String?
+  topperScore String?
+  school      School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId])
+  @@index([schoolId, classLevel])
+}
+
+model Scholarship {
+  id          String  @id @default(cuid())
+  schoolId    String
+  name        String
+  eligibility String?
+  benefits    String?
+  school      School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId])
+}
+
+model SchoolFAQ {
+  id       String @id @default(cuid())
+  schoolId String
+  question String
+  answer   String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId])
+}
+
+model SchoolDownload {
+  id       String @id @default(cuid())
+  schoolId String
+  label    String
+  url      String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId])
+}
+
+model Inquiry {
+  id        String        @id @default(cuid())
+  schoolId  String
+  parentId  String
+  message   String
+  status    InquiryStatus @default(NEW)
+  createdAt DateTime      @default(now())
+  parent    User          @relation("ParentInquiries", fields: [parentId], references: [id])
+  school    School        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, status])
+  @@index([parentId])
+}
+
+model Favourite {
+  id        String   @id @default(cuid())
+  parentId  String
+  schoolId  String
+  createdAt DateTime @default(now())
+  parent    User     @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@unique([parentId, schoolId])
+  @@index([parentId])
+}
+
+model AdminAuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  actorEmail String
+  action     String
+  targetType String
+  targetId   String
+  metadata   String?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([targetId])
+  @@index([createdAt])
+}
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model LocalityCoordinate {
+  id        String   @id @default(cuid())
+  locality  String   // normalized: trim, lowercase, collapsed spaces
+  city      String
+  state     String
+  latitude  Float
+  longitude Float
+  source    String   // "nominatim" | "manual" | "city-fallback"
+  createdAt DateTime @default(now())
+
+  @@unique([locality, city, state])
+}
+
+enum Role {
+  PARENT
+  SCHOOL_ADMIN
+  ADMIN
+}
+
+enum SchoolStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  DRAFT
+}
+
+enum BoardType {
+  CBSE
+  ICSE
+  IB
+  IGCSE
+  NIOS
+  STATE_BOARD
+  OTHER
+}
+
+
+enum SchoolType {
+  BOYS
+  GIRLS
+  CO_ED
+}
+
+enum MediumType {
+  HINDI
+  ENGLISH
+  BOTH
+  OTHER
+}
+
+enum InquiryStatus {
+  NEW
+  CONTACTED
+  INTERESTED
+  CONVERTED
+  CLOSED
+}
+
+enum AdminAccessLevel {
+  READ_ONLY
+  READ_WRITE
+  FULL_ACCESS
+}

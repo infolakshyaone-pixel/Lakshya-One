@@ -1,0 +1,185 @@
+import { Router } from "express";
+import {
+  getStats,
+  getAdminSchools,
+  getAdminStates,
+  getAdminCities,
+  approveSchool,
+  rejectSchool,
+  approveSchoolById,
+  rejectSchoolById,
+  addSchoolDirect,
+  addParentDirect,
+  addAdminDirect,
+  deleteUserDirect,
+  toggleSchoolVisibility,
+  getAdminUsers,
+  getAdminInquiries,
+  updateUserRole,
+  updateUserStatus,
+  updateUserAccount,
+  checkOwnerEmail,
+  getAdminSchoolById,
+  setSchoolFeatured,
+  
+} from "../controllers/admin.controller";
+import { auth } from "../middleware/auth";
+import { requireRole, requireAdminLevel, blockIfSuperAdminTarget  } from "../middleware/roleCheck";
+import { validate } from "../middleware/validate";
+import { asyncHandler } from "../utils/asyncHandler";
+import { addParentSchema, addAdminSchema, adminUpdateUserSchema } from "../validators/auth.validator";
+import { authenticatedRateLimiter } from "../middleware/security";
+
+const router = Router();
+
+// All admin routes require authentication + ADMIN role
+router.use(auth, requireRole("ADMIN"));
+router.use(authenticatedRateLimiter);
+
+// ── READ_ONLY and above ────────────────────────────────────────────────────────
+// These are safe read operations — all three tiers can access them.
+
+router.get(
+  "/stats",
+  requireAdminLevel("READ_ONLY"),
+  asyncHandler(getStats),
+);
+
+router.get(
+  "/schools",
+  requireAdminLevel("READ_ONLY"),
+  asyncHandler(getAdminSchools),
+);
+
+router.get(
+  "/schools/states",
+  requireAdminLevel("READ_ONLY"),
+  asyncHandler(getAdminStates),
+);
+
+router.get(
+  "/schools/cities",
+  requireAdminLevel("READ_ONLY"),
+  asyncHandler(getAdminCities),
+);
+
+router.get(
+  "/schools/:id",
+  requireAdminLevel("READ_ONLY"),
+  asyncHandler(getAdminSchoolById),
+);
+
+router.get(
+  "/users",
+  requireAdminLevel("READ_ONLY"),
+  asyncHandler(getAdminUsers),
+);
+
+router.get(
+  "/inquiries",
+  requireAdminLevel("READ_ONLY"),
+  asyncHandler(getAdminInquiries),
+);
+
+router.get(
+  "/check-owner",
+  requireAdminLevel("READ_ONLY"),
+  asyncHandler(checkOwnerEmail),
+);
+
+// ── READ_WRITE and above ───────────────────────────────────────────────────────
+// Mutations that don't involve deletion or privilege escalation.
+
+router.patch(
+  "/schools/:id/approve",
+  requireAdminLevel("READ_WRITE"),
+  asyncHandler(approveSchoolById),
+);
+
+router.patch(
+  "/schools/:id/reject",
+  requireAdminLevel("READ_WRITE"),
+  asyncHandler(rejectSchoolById),
+);
+
+router.patch(
+  "/schools/:id/featured",
+  requireAdminLevel("READ_WRITE"),
+  asyncHandler(setSchoolFeatured),
+);
+
+// Legacy approve/reject — kept for backward compat
+router.post(
+  "/approve",
+  requireAdminLevel("READ_WRITE"),
+  asyncHandler(approveSchool),
+);
+
+router.post(
+  "/reject",
+  requireAdminLevel("READ_WRITE"),
+  asyncHandler(rejectSchool),
+);
+
+router.post(
+  "/add-school",
+  requireAdminLevel("READ_WRITE"),
+  asyncHandler(addSchoolDirect),
+);
+
+router.patch(
+  "/schools/:id/visibility",
+  requireAdminLevel("READ_WRITE"),
+  asyncHandler(toggleSchoolVisibility),
+);
+
+router.post(
+  "/add-parent",
+  requireAdminLevel("READ_WRITE"),
+  validate(addParentSchema),
+  asyncHandler(addParentDirect),
+);
+
+// ── FULL_ACCESS only ───────────────────────────────────────────────────────────
+// Destructive or privilege-escalating operations.
+
+router.patch(
+  "/users/:id/role",
+  requireAdminLevel("FULL_ACCESS"),
+  blockIfSuperAdminTarget,
+  asyncHandler(updateUserRole),
+);
+
+router.patch(
+  "/users/:id/status",
+  requireAdminLevel("FULL_ACCESS"),
+  blockIfSuperAdminTarget,
+  asyncHandler(updateUserStatus),
+);
+
+router.patch(
+  "/users/:id/account",
+  requireAdminLevel("FULL_ACCESS"),
+  blockIfSuperAdminTarget,
+  validate(adminUpdateUserSchema),
+  asyncHandler(updateUserAccount),
+);
+
+router.post(
+  "/add-admin",
+  requireAdminLevel("FULL_ACCESS"),
+  validate(addAdminSchema),
+  asyncHandler(addAdminDirect),
+);
+
+
+router.delete(
+  "/users/:id",
+  requireAdminLevel("FULL_ACCESS"),
+  blockIfSuperAdminTarget,
+  asyncHandler(deleteUserDirect),
+);
+
+
+
+export default router;
