@@ -1,5 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
-import { GraduationCap, Mail, MapPin } from "lucide-react";
+import { Mail, MapPin } from "lucide-react";
 
 const FOOTER_LINKS = [
   { href: "/schools", label: "Browse schools" },
@@ -21,13 +22,17 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-4">
           <div className="space-y-4 md:col-span-1">
-            <Link href="/" className="inline-flex items-center gap-2">
-              <span className="rounded-xl bg-amber-400 p-2 shadow-amber">
-                <GraduationCap className="h-5 w-5 text-white" aria-hidden />
-              </span>
-              <span className="font-heading text-xl font-bold tracking-tight text-white">
-                Lakshya One
-              </span>
+            <Link href="/" className="inline-flex items-center">
+              <div className="rounded-xl bg-white/95 px-4 py-2.5 shadow-sm">
+                <Image
+                  src="/logo.png"
+                  alt="Lakshya One"
+                  width={180}
+                  height={48}
+                  className="h-9 w-auto"
+                  priority={false}
+                />
+              </div>
             </Link>
 
             <p className="max-w-xs font-body text-sm leading-relaxed text-blue-200/90">
