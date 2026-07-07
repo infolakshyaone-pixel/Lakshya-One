@@ -25,6 +25,7 @@ const connectSrc = [
   "https://script.google.com",
   "https://api.emailjs.com",
   "https://*.ingest.sentry.io",
+   "https://*.ingest.de.sentry.io", 
 ];
 if (apiOrigin) connectSrc.push(apiOrigin);
 if (siteOrigin && siteOrigin !== apiOrigin) connectSrc.push(siteOrigin);
