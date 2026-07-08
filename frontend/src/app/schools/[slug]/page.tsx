@@ -314,11 +314,12 @@ const TYPE_LABEL: Record<string, string> = {
 const MEDIUM_LABEL: Record<string, string> = {
   HINDI: "Hindi Medium",
   ENGLISH: "English Medium",
-  BOTH: "Hindi + English Medium",
+  BOTH: "Hindi + English",
   OTHER: "Other Medium",
 };
 
 function getBoardLabel(school: Pick<SchoolDetail, "board" | "stateBoardName">) {
+  if (!school.board) return null;
   if (school.board === "STATE_BOARD") {
     return school.stateBoardName
       ? `${school.stateBoardName} Board`
@@ -327,7 +328,8 @@ function getBoardLabel(school: Pick<SchoolDetail, "board" | "stateBoardName">) {
   return BOARD_LABEL[school.board] ?? school.board;
 }
 
-function decodeHtmlEntities(value: string) {
+function decodeHtmlEntities(value: string | null | undefined): string {
+  if (!value) return "";
   let output = value;
   for (let i = 0; i < 5; i++) {
     const next = output
@@ -350,6 +352,7 @@ function getMediumLabel(
   if (typeof schoolOrMedium === "string") {
     return MEDIUM_LABEL[schoolOrMedium] ?? schoolOrMedium;
   }
+  if (!schoolOrMedium.medium) return null;   // ← ADD
   if (schoolOrMedium.medium === "OTHER") {
     return schoolOrMedium.mediumOther
       ? decodeHtmlEntities(schoolOrMedium.mediumOther)
@@ -747,8 +750,8 @@ export default async function SchoolDetailPage({
         {/* Overlay — dark gradient always present, stronger when image exists */}
         <div
           className={`absolute inset-0 ${school.coverImageUrl
-              ? "bg-gradient-to-b from-blue-900/70 via-blue-900/80 to-blue-900/95"
-              : ""
+            ? "bg-gradient-to-b from-blue-900/70 via-blue-900/80 to-blue-900/95"
+            : ""
             }`}
         />
 
@@ -818,12 +821,16 @@ export default async function SchoolDetailPage({
 
               {/* Badges */}
               <div className="flex flex-wrap gap-2 mt-3">
-                <span className="px-3 py-1 rounded-full bg-white/15 border border-white/20 text-white text-label">
-                  {getBoardLabel(school)}
-                </span>
-                <span className="px-3 py-1 rounded-full bg-white/15 border border-white/20 text-white text-label">
-                  {TYPE_LABEL[school.schoolType]}
-                </span>
+                {getBoardLabel(school) && (
+                  <span className="px-3 py-1 rounded-full bg-white/15 border border-white/20 text-white text-label">
+                    {getBoardLabel(school)}
+                  </span>
+                )}
+                {school.schoolType && (
+                  <span className="px-3 py-1 rounded-full bg-white/15 border border-white/20 text-white text-label">
+                    {TYPE_LABEL[school.schoolType]}
+                  </span>
+                )}
                 <span className="px-3 py-1 rounded-full bg-white/15 border border-white/20 text-white text-label">
                   {getMediumLabel(school)}
                 </span>
@@ -901,11 +908,12 @@ export default async function SchoolDetailPage({
           {hasAcademics(school) && (
             <SectionCard title="Academic Details">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                <InfoTile label="Board" value={getBoardLabel(school)} />
-                <InfoTile
-                  label="School Type"
-                  value={TYPE_LABEL[school.schoolType]}
-                />
+                {getBoardLabel(school) && (
+                  <InfoTile label="Board" value={getBoardLabel(school)} />
+                )}
+                {school.schoolType && (
+                  <InfoTile label="School Type" value={TYPE_LABEL[school.schoolType]} />
+                )}
                 <InfoTile label="Medium" value={getMediumLabel(school)} />
                 <InfoTile
                   label="Classes"
@@ -2072,7 +2080,7 @@ function TextBlock({ label, value }: { label: string; value: string }) {
   );
 }
 
-function InfoTile({ label, value }: { label: string; value: string }) {
+function InfoTile({ label, value }: { label: string; value: string | null | undefined }) {
   return (
     <div className="bg-blue-50 rounded-xl p-3.5 border border-blue-200">
       <p className="font-body text-meta text-gray-400 mb-1">{label}</p>

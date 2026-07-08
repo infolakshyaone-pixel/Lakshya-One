@@ -7,6 +7,10 @@ import {
 
 // ── Enum schemas ──────────────────────────────────────────────────────────────
 const boardSchema = z.enum(["CBSE", "ICSE", "IB", "IGCSE", "NIOS", "STATE_BOARD", "OTHER"]);
+const nullableBoardSchema = z.preprocess(
+  (v) => (v === "" ? null : v),
+  boardSchema.nullable(),
+);
 const schoolTypeSchema = z.enum(["BOYS", "GIRLS", "CO_ED"]);
 const mediumSchema = z.enum(["HINDI", "ENGLISH", "BOTH", "OTHER"]);
 
@@ -150,7 +154,7 @@ const schoolBodyFields = {
   latitude: optionalCoordinate(-90, 90, "Latitude"),
   longitude: optionalCoordinate(-180, 180, "Longitude"),
 
-  board: boardSchema,
+  board: nullableBoardSchema,
   schoolType: schoolTypeSchema,
   medium: mediumSchema,
   mediumOther: optionalStr,

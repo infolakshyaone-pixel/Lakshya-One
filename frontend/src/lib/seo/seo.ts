@@ -116,7 +116,7 @@ export type SchoolSeoInput = {
   state: string;
   address: string;
   pincode?: string | null;
-  board: string;
+  board: string | null;   // ← fix: ab null allowed hai
   phone: string;
   website?: string | null;
   logoUrl?: string | null;
@@ -125,13 +125,19 @@ export type SchoolSeoInput = {
 };
 
 export function buildSchoolMetadata(school: SchoolSeoInput): Metadata {
-  const boardLabel = BOARD_LABEL[school.board] ?? school.board;
+  const boardLabel = school.board
+    ? BOARD_LABEL[school.board] ?? school.board
+    : null;
 
-  const title = `${school.name} — ${boardLabel} School in ${school.city}`;
+  const title = boardLabel
+    ? `${school.name} — ${boardLabel} School in ${school.city}`
+    : `${school.name} — School in ${school.city}`;
 
   const description =
     school.description?.slice(0, 160) ||
-    `${school.name} is a ${boardLabel} school in ${school.city}, ${school.state}. Classes ${school.classesFrom} to ${school.classesTo}. View fees, facilities, and contact details on Lakshya One.`;
+    (boardLabel
+      ? `${school.name} is a ${boardLabel} school in ${school.city}, ${school.state}. Classes ${school.classesFrom} to ${school.classesTo}. View fees, facilities, and contact details on Lakshya One.`
+      : `${school.name} is a school in ${school.city}, ${school.state}. Classes ${school.classesFrom} to ${school.classesTo}. View fees, facilities, and contact details on Lakshya One.`);
 
   return buildPageMetadata({
     title,
@@ -140,7 +146,7 @@ export function buildSchoolMetadata(school: SchoolSeoInput): Metadata {
     keywords: [
       school.name,
       `${school.name} ${school.city}`,
-      `${boardLabel} school ${school.city}`,
+      ...(boardLabel ? [`${boardLabel} school ${school.city}`] : []),
       `schools in ${school.city}`,
       `best schools in ${school.city}`,
       "school admission",
@@ -154,7 +160,9 @@ export function buildEducationalOrganizationJsonLd(
   school: SchoolSeoInput,
 ): Record<string, unknown> {
   const siteUrl = getSiteUrl();
-  const boardLabel = BOARD_LABEL[school.board] ?? school.board;
+  const boardLabel = school.board
+    ? BOARD_LABEL[school.board] ?? school.board
+    : null;
 
   return {
     "@context": "https://schema.org",
@@ -163,7 +171,9 @@ export function buildEducationalOrganizationJsonLd(
     url: `${siteUrl}/schools/${school.slug}`,
     description:
       school.description ||
-      `${school.name} — ${boardLabel} school in ${school.city}`,
+      (boardLabel
+        ? `${school.name} — ${boardLabel} school in ${school.city}`
+        : `${school.name} — school in ${school.city}`),
     image: school.logoUrl ?? undefined,
     telephone: school.phone,
     address: {

@@ -61,7 +61,7 @@ const TYPE_LABELS: Record<Exclude<SchoolCardProps["schoolType"], null>, string> 
 const MEDIUM_LABELS: Record<Exclude<SchoolCardProps["medium"], null>, string> = {
   HINDI:   "Hindi",
   ENGLISH: "English",
-  BOTH:    "Bilingual",
+  BOTH:    "English + Hindi",
   OTHER:   "Other",
 };
 
@@ -262,17 +262,24 @@ function SchoolCardComponent(props: SchoolCardProps) {
           </div>
 
           {/* Badges: board, type, medium */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            <span className="badge-premium bg-info-bg text-info-text border-blue-200">
-              {boardLabel}
-            </span>
-            <span className="badge-premium bg-blue-50 text-blue-700 border-blue-100">
-              {schoolType ? TYPE_LABELS[schoolType] : "Type not set"}
-            </span>
-            <span className="badge-premium bg-gray-50 text-gray-600 border-gray-100">
-              {mediumLabel}
-            </span>
-          </div>
+          {/* Badges: board, type, medium — only show when set */}
+<div className="flex flex-wrap gap-2 mb-4">
+  {board && (
+    <span className="badge-premium bg-info-bg text-info-text border-blue-200">
+      {boardLabel}
+    </span>
+  )}
+  {schoolType && (
+    <span className="badge-premium bg-blue-50 text-blue-700 border-blue-100">
+      {TYPE_LABELS[schoolType]}
+    </span>
+  )}
+  {medium && (
+    <span className="badge-premium bg-gray-50 text-gray-600 border-gray-100">
+      {mediumLabel}
+    </span>
+  )}
+</div>
 
           {/* Classes + fee — pushed to bottom */}
           <div className="mt-auto border-t border-gray-100 pt-4 flex items-end justify-between gap-3">

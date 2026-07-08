@@ -909,7 +909,7 @@ export default function SchoolProfileForm({
           schoolCategory: data.basicInfo.category || undefined,
           schoolFormat: data.basicInfo.format || undefined,
           schoolType: data.basicInfo.genderType || undefined,
-          board: data.basicInfo.board || undefined,
+          board: data.basicInfo.board || null,
           stateBoardName: data.basicInfo.stateBoardName || undefined,
           medium: data.basicInfo.medium || undefined,
           mediumOther:
