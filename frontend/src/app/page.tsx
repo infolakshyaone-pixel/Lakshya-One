@@ -33,7 +33,6 @@ export default function HomePage() {
       <HomeHero />
       {/* <HomeSearch /> */}
       <HomeBrowse />
-      /
       
 
       <Suspense fallback={<FeaturedSchoolsSkeleton />}>
