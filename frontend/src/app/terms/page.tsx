@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     "Read the Terms of Service for Lakshya One, covering account registration, platform usage rules, school listing data, and liability.",
   alternates: {
-    canonical: "https://lakshyaone.com/terms",
+    canonical: "https://lakshyaone.in/terms",
   },
 };
 

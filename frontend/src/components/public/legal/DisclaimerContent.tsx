@@ -7,10 +7,10 @@ export default function DisclaimerContent() {
         <p className="mt-3 font-body text-body text-gray-600 leading-relaxed">
           Lakshya One (
           <a
-            href="https://lakshyaone.com"
+            href="https://lakshyaone.in"
             className="font-medium text-blue-600 hover:text-blue-800"
           >
-            lakshyaone.com
+            lakshyaone.in
           </a>
           ) is a school discovery platform. This page explains where our
           school listing data comes from, what it does and doesn&apos;t

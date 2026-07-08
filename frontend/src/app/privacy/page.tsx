@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     "Learn how Lakshya One collects, uses, and protects your personal information, including data shared with third-party services.",
   alternates: {
-    canonical: "https://lakshyaone.com/privacy",
+    canonical: "https://lakshyaone.in/privacy",
   },
 };
 

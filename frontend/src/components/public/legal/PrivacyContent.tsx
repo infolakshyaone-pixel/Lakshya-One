@@ -7,10 +7,10 @@ export default function PrivacyContent() {
         <p className="mt-3 font-body text-body text-gray-600 leading-relaxed">
           This Privacy Policy explains what information Lakshya One (
           <a
-            href="https://lakshyaone.com"
+            href="https://lakshyaone.in"
             className="font-medium text-blue-600 hover:text-blue-800"
           >
-            lakshyaone.com
+            lakshyaone.in
           </a>
           ) collects, why we collect it, and how it is used and protected.
         </p>

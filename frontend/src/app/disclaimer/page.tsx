@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     "Learn where Lakshya One's school listing data comes from, including school websites, third-party sources, and publicly available information, and how to report or correct it.",
   alternates: {
-    canonical: "https://lakshyaone.com/disclaimer",
+    canonical: "https://lakshyaone.in/disclaimer",
   },
 };
 
