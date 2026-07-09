@@ -26,12 +26,24 @@ export function encodeHtmlEntities(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
+// export function sanitizeTextField(value: string): string {
+//   return encodeHtmlEntities(stripDangerousTags(value.trim()));
+// }
+
+// export function sanitizePlainTextField(value: string): string {
+//   return encodeHtmlEntities(stripAllHtmlTags(stripDangerousTags(value.trim())));
+// }
+
 export function sanitizeTextField(value: string): string {
-  return encodeHtmlEntities(stripDangerousTags(value.trim()));
+  // NOTE: We intentionally do NOT HTML-entity-encode here.
+  // Raw text (tags stripped) is stored, and React/JSX escapes it
+  // automatically at render time. Encoding here caused double-encoding
+  // — "&" became "&amp;" in DB, then React escaped it again to "&amp;amp;".
+  return stripDangerousTags(value.trim());
 }
 
 export function sanitizePlainTextField(value: string): string {
-  return encodeHtmlEntities(stripAllHtmlTags(stripDangerousTags(value.trim())));
+  return stripAllHtmlTags(stripDangerousTags(value.trim()));
 }
 
 export function isValidIndianPhone(phone: string): boolean {

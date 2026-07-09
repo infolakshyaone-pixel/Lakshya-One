@@ -492,7 +492,13 @@ function getSectionCustomFields(
 // ─── Section visibility guards ────────────────────────────────────────────────
 
 function hasAbout(s: SchoolDetail) {
-  return !!(s.description || s.vision || s.mission || s.principalMessage);
+  return !!(
+    s.description ||
+    s.vision ||
+    s.mission ||
+    s.principalMessage ||
+    getSectionCustomFields(s.customFields, "about").length > 0
+  );
 }
 
 function hasAcademics(s: SchoolDetail) {
@@ -515,7 +521,9 @@ function hasAcademics(s: SchoolDetail) {
     s.canteenAvailable ||
     s.workingDays ||
     s.startTime ||
-    s.endTime
+    s.endTime ||
+    getSectionCustomFields(s.customFields, "academics").length > 0 ||
+    getSectionCustomFields(s.customFields, "basicInfo").length > 0
   );
 }
 
@@ -530,7 +538,8 @@ function hasAdmissions(s: SchoolDetail) {
     s.admissionCoordinators?.length ||
     s.admissionCoordinatorName ||
     s.admissionPhone ||
-    s.admissionEmail
+    s.admissionEmail ||
+    getSectionCustomFields(s.customFields, "admissions").length > 0
   );
 }
 
@@ -547,7 +556,8 @@ function hasFees(s: SchoolDetail) {
     s.tuitionFeeMonthly ||
     s.totalAnnualFee ||
     s.transportFee ||
-    s.hostelFee
+    s.hostelFee ||
+    getSectionCustomFields(s.customFields, "fees").length > 0
   );
 }
 
@@ -555,12 +565,17 @@ function hasFacilities(s: SchoolDetail) {
   return !!(
     s.facilitiesList?.length ||
     s.facilities?.length ||
-    s.facilityCustomGroups
+    s.facilityCustomGroups ||
+    getSectionCustomFields(s.customFields, "facilities").length > 0
   );
 }
 
 function hasSports(s: SchoolDetail) {
-  return !!(s.sportsList?.length || s.sportsCustomGroups);
+  return !!(
+    s.sportsList?.length ||
+    s.sportsCustomGroups ||
+    getSectionCustomFields(s.customFields, "sports").length > 0
+  );
 }
 
 function hasInfrastructure(s: SchoolDetail) {
@@ -579,7 +594,10 @@ function hasFaculty(s: SchoolDetail) {
 }
 
 function hasPrograms(s: SchoolDetail) {
-  return !!s.programsList?.length;
+  return !!(
+    s.programsList?.length ||
+    getSectionCustomFields(s.customFields, "programs").length > 0
+  );
 }
 
 function hasStudentLife(s: SchoolDetail) {
@@ -587,7 +605,8 @@ function hasStudentLife(s: SchoolDetail) {
     s.clubsActivities ||
     s.culturalActivities ||
     s.annualEvents ||
-    s.educationalTours
+    s.educationalTours ||
+    getSectionCustomFields(s.customFields, "studentLife").length > 0
   );
 }
 
@@ -595,7 +614,8 @@ function hasAchievements(s: SchoolDetail) {
   return !!(
     s.academicAchievements ||
     s.sportsAchievements ||
-    s.awardsRecognitions
+    s.awardsRecognitions ||
+    getSectionCustomFields(s.customFields, "achievements").length > 0
   );
 }
 
@@ -1024,6 +1044,20 @@ export default async function SchoolDetailPage({
                 />
               )}
 
+
+              {/* Basic Info custom fields */}
+              {getSectionCustomFields(school.customFields, "basicInfo").length >
+                0 && (
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {getSectionCustomFields(school.customFields, "basicInfo").map(
+                      (f) => (
+                        <InfoTile key={f.id} label={f.label} value={f.value} />
+                      ),
+                    )}
+                  </div>
+                )}
+
+
               {/* Academics custom fields */}
               {getSectionCustomFields(school.customFields, "academics").length >
                 0 && (
@@ -1035,6 +1069,9 @@ export default async function SchoolDetailPage({
                     )}
                   </div>
                 )}
+
+
+
             </SectionCard>
           )}
 
@@ -1456,74 +1493,70 @@ export default async function SchoolDetailPage({
           )}
 
           {/* Board Results */}
-          {school.boardResults?.length > 0 && (
-            <SectionCard title="Board Results">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b border-gray-100">
-                      <th className="pb-3 font-heading font-semibold text-label text-gray-400 uppercase tracking-wide">
-                        Year
-                      </th>
-                      <th className="pb-3 font-heading font-semibold text-label text-gray-400 uppercase tracking-wide">
-                        Class
-                      </th>
-                      <th className="pb-3 font-heading font-semibold text-label text-gray-400 uppercase tracking-wide text-center">
-                        Pass %
-                      </th>
-                      <th className="pb-3 font-heading font-semibold text-label text-gray-400 uppercase tracking-wide">
-                        Topper
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {school.boardResults.map((r) => (
-                      <tr key={r.id}>
-                        <td className="py-3 font-heading font-semibold text-body text-gray-800">
-                          {r.year}
-                        </td>
-                        <td className="py-3 font-body text-body text-gray-700">
-                          {getClassLevelLabel(r.classLevel)}
-                        </td>
-                        <td className="py-3 text-center font-body text-body text-gray-700">
-                          {r.passPercent ??
-                            r.class10Pass ??
-                            r.class12Pass ??
-                            "—"}
-                        </td>
-                        <td className="py-3 font-body text-body text-gray-700">
-                          {r.topperName ? (
-                            <span>
-                              {r.topperName}
-                              {r.topperScore && (
-                                <span className="ml-1.5 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-meta font-heading font-semibold">
-                                  {r.topperScore}
+          {(school.boardResults?.length > 0 ||
+            getSectionCustomFields(school.customFields, "boardResults").length > 0) && (
+              <SectionCard title="Board Results">
+                {school.boardResults?.length > 0 && (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead>
+                        <tr className="border-b border-gray-100">
+                          <th className="pb-3 font-heading font-semibold text-label text-gray-400 uppercase tracking-wide">
+                            Year
+                          </th>
+                          <th className="pb-3 font-heading font-semibold text-label text-gray-400 uppercase tracking-wide">
+                            Class
+                          </th>
+                          <th className="pb-3 font-heading font-semibold text-label text-gray-400 uppercase tracking-wide text-center">
+                            Pass %
+                          </th>
+                          <th className="pb-3 font-heading font-semibold text-label text-gray-400 uppercase tracking-wide">
+                            Topper
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {school.boardResults.map((r) => (
+                          <tr key={r.id}>
+                            <td className="py-3 font-heading font-semibold text-body text-gray-800">
+                              {r.year}
+                            </td>
+                            <td className="py-3 font-body text-body text-gray-700">
+                              {getClassLevelLabel(r.classLevel)}
+                            </td>
+                            <td className="py-3 text-center font-body text-body text-gray-700">
+                              {r.passPercent ?? r.class10Pass ?? r.class12Pass ?? "—"}
+                            </td>
+                            <td className="py-3 font-body text-body text-gray-700">
+                              {r.topperName ? (
+                                <span>
+                                  {r.topperName}
+                                  {r.topperScore && (
+                                    <span className="ml-1.5 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-meta font-heading font-semibold">
+                                      {r.topperScore}
+                                    </span>
+                                  )}
                                 </span>
+                              ) : (
+                                "—"
                               )}
-                            </span>
-                          ) : (
-                            "—"
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {/* Board Results custom fields */}
-              {getSectionCustomFields(school.customFields, "boardResults")
-                .length > 0 && (
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                {/* Board Results custom fields */}
+                {getSectionCustomFields(school.customFields, "boardResults").length > 0 && (
                   <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {getSectionCustomFields(
-                      school.customFields,
-                      "boardResults",
-                    ).map((f) => (
+                    {getSectionCustomFields(school.customFields, "boardResults").map((f) => (
                       <InfoTile key={f.id} label={f.label} value={f.value} />
                     ))}
                   </div>
                 )}
-            </SectionCard>
-          )}
+              </SectionCard>
+            )}
 
           {/* Scholarships */}
           {school.scholarships?.length > 0 && (

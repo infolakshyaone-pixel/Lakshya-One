@@ -14,15 +14,28 @@ const nullableBoardSchema = z.preprocess(
 const schoolTypeSchema = z.enum(["BOYS", "GIRLS", "CO_ED"]);
 const mediumSchema = z.enum(["HINDI", "ENGLISH", "BOTH", "OTHER"]);
 
+
+// ── Local nullable-aware preprocessors (fix: empty field clear on save) ──────
+const preprocessNullableString = (value: unknown): unknown => {
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+  if (typeof value !== "string") return value;
+  const trimmed = value.trim();
+  return trimmed === "" ? null : trimmed;
+};
+
+const preprocessNullableNumeric = (value: unknown): unknown =>
+  value === undefined ? undefined : value === "" || value === null ? null : value;
+
 // ── Reusable preprocessors ────────────────────────────────────────────────────
 const optionalFee = z.preprocess(
-  (v) => (v === "" || v === null || v === undefined ? undefined : v),
-  z.coerce.number().nonnegative().optional(),
+  preprocessNullableNumeric,
+  z.coerce.number().nonnegative().nullable().optional(),
 );
 
 const optionalInt = z.preprocess(
-  (v) => (v === "" || v === null || v === undefined ? undefined : v),
-  z.coerce.number().int().nonnegative().optional(),
+  preprocessNullableNumeric,
+  z.coerce.number().int().nonnegative().nullable().optional(),
 );
 
 const optionalBool = z.preprocess(
@@ -32,32 +45,28 @@ const optionalBool = z.preprocess(
 
 const optionalCoordinate = (min: number, max: number, label: string) =>
   z.preprocess(
-    (v) => (v === "" || v === null || v === undefined ? undefined : v),
-    z.coerce
-      .number()
-      .min(min, `${label} must be at least ${min}`)
-      .max(max, `${label} must be at most ${max}`)
-      .optional(),
+    preprocessNullableNumeric,
+    z.coerce.number().min(min, `${label} must be at least ${min}`).max(max, `${label} must be at most ${max}`).nullable().optional(),
   );
 
 const optionalStr = z.preprocess(
-  preprocessOptionalString,
-  z.string().optional(),
+  preprocessNullableString,
+  z.string().nullable().optional(),
 );
 
 const optionalTextStr = z.preprocess(
-  preprocessOptionalString,
-  z.string().max(10000).optional(),
+  preprocessNullableString,
+  z.string().max(10000).nullable().optional(),
 );
 
 const optionalUrl = z.preprocess(
-  preprocessOptionalString,
-  z.string().url("Enter a valid URL").optional(),
+  preprocessNullableString,
+  z.string().url("Enter a valid URL").nullable().optional(),
 );
 
 const optionalEmail = z.preprocess(
-  preprocessOptionalString,
-  z.string().email("Enter a valid email").optional(),
+  preprocessNullableString,
+  z.string().email("Enter a valid email").nullable().optional(),
 );
 
 const stringArray = z.array(z.string()).optional().default([]);
@@ -161,15 +170,15 @@ const schoolBodyFields = {
   classesFrom: z.coerce.number().int().min(1).max(12),
   classesTo: z.coerce.number().int().min(1).max(12),
   phone: z.preprocess(
-    preprocessIndianPhone,
-    z.string().regex(/^\d{10}$/, "Enter a valid 10-digit phone number"),
-  ),
+  preprocessIndianPhone,
+  z.string().regex(/^\d{10}$/, "Enter a valid 10-digit phone number"),
+),
   email: optionalEmail,
   website: optionalUrl,
-  logoUrl: z.preprocess(preprocessOptionalString, z.string().url().optional()),
+  logoUrl: z.preprocess(preprocessNullableString, z.string().url().nullable().optional()),
   coverImageUrl: z.preprocess(
-    preprocessOptionalString,
-    z.string().url().optional(),
+    preprocessNullableString,
+    z.string().url().nullable().optional(),
   ),
   description: optionalTextStr,
 
@@ -184,8 +193,8 @@ const schoolBodyFields = {
   // ── Section 1: Basic Info ────────────────────────────────────────────────
   tagline: optionalStr,
   establishedYear: z.preprocess(
-    (v) => (v === "" || v === null || v === undefined ? undefined : v),
-    z.coerce.number().int().min(1800).max(2100).optional(),
+    preprocessNullableNumeric,
+    z.coerce.number().int().min(1800).max(2100).nullable().optional(),
   ),
   managementType: optionalStr,
   schoolCategory: optionalStr,
@@ -290,11 +299,8 @@ const schoolBodyFields = {
 
   // ── Section 20: Contact extras ──────────────────────────────────────────
   whatsapp: z.preprocess(
-    preprocessOptionalString,
-    z
-      .string()
-      .regex(/^\d{10}$/, "Enter a valid 10-digit WhatsApp number")
-      .optional(),
+    preprocessNullableString,
+    z.string().regex(/^\d{10}$/, "Enter a valid 10-digit WhatsApp number").nullable().optional(),
   ),
   mapUrl: optionalStr,
   facebook: optionalStr,

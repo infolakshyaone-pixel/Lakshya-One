@@ -452,12 +452,12 @@ function mapSchoolToFormData(
 ): SchoolProfileFormData {
   const rawCustomFields = Array.isArray(school.customFields)
     ? (school.customFields as Array<{
-        id?: string;
-        section?: string;
-        label?: string;
-        value?: string;
-        fieldType?: string;
-      }>)
+      id?: string;
+      section?: string;
+      label?: string;
+      value?: string;
+      fieldType?: string;
+    }>)
     : [];
 
   function getCustomFieldsForSection(section: string) {
@@ -490,7 +490,7 @@ function mapSchoolToFormData(
       mediumOther: (school.mediumOther as string) || "", // ← YE ADD KARO
       city: (school.city as string) || "",
       state: (school.state as string) || "",
-      locality: (school.locality as string) || "", 
+      locality: (school.locality as string) || "",
       address: (school.address as string) || "",
       mapUrl: (school.mapUrl as string) || "",
       latitude: toStringValue(school.latitude),
@@ -659,16 +659,16 @@ function mapSchoolToFormData(
     scholarships: {
       list: Array.isArray(school.scholarships)
         ? (
-            school.scholarships as Array<{
-              name?: string;
-              eligibility?: string;
-              benefits?: string;
-            }>
-          ).map((s) => ({
-            name: s.name ?? "",
-            eligibility: s.eligibility ?? "",
-            benefits: s.benefits ?? "",
-          }))
+          school.scholarships as Array<{
+            name?: string;
+            eligibility?: string;
+            benefits?: string;
+          }>
+        ).map((s) => ({
+          name: s.name ?? "",
+          eligibility: s.eligibility ?? "",
+          benefits: s.benefits ?? "",
+        }))
         : [],
     },
     hostel: {
@@ -719,28 +719,28 @@ function mapSchoolToFormData(
     gallery: {
       images: Array.isArray(school.images)
         ? (
-            school.images as Array<{
-              id?: string;
-              url?: string;
-              caption?: string;
-              category?: string;
-            }>
-          ).map((img) => ({
-            id: img.id ?? undefined, // ← ADD id
-            url: img.url ?? "",
-            caption: img.caption ?? "",
-            category: img.category ?? "", // ← string, not enum
-          }))
+          school.images as Array<{
+            id?: string;
+            url?: string;
+            caption?: string;
+            category?: string;
+          }>
+        ).map((img) => ({
+          id: img.id ?? undefined, // ← ADD id
+          url: img.url ?? "",
+          caption: img.caption ?? "",
+          category: img.category ?? "", // ← string, not enum
+        }))
         : [],
     },
     downloads: {
       files: Array.isArray(school.downloads)
         ? (school.downloads as Array<{ label?: string; url?: string }>).map(
-            (d) => ({
-              label: d.label ?? "",
-              url: d.url ?? "",
-            }),
-          )
+          (d) => ({
+            label: d.label ?? "",
+            url: d.url ?? "",
+          }),
+        )
         : [],
     },
     contact: {
@@ -758,11 +758,11 @@ function mapSchoolToFormData(
       linkedin: (school.linkedin as string) || "",
       socialLinks: Array.isArray(school.socialLinks) // ← ADD
         ? (
-            school.socialLinks as Array<{ platform?: string; url?: string }>
-          ).map((s) => ({
-            platform: s.platform ?? "",
-            url: s.url ?? "",
-          }))
+          school.socialLinks as Array<{ platform?: string; url?: string }>
+        ).map((s) => ({
+          platform: s.platform ?? "",
+          url: s.url ?? "",
+        }))
         : [],
       additionalPhones: readAdditionalPhones(school.additionalPhones),
       admissionCoordinators: readAdmissionCoordinators(school),
@@ -770,11 +770,11 @@ function mapSchoolToFormData(
     faqs: {
       list: Array.isArray(school.faqs)
         ? (school.faqs as Array<{ question?: string; answer?: string }>).map(
-            (f) => ({
-              question: f.question ?? "",
-              answer: f.answer ?? "",
-            }),
-          )
+          (f) => ({
+            question: f.question ?? "",
+            answer: f.answer ?? "",
+          }),
+        )
         : [],
     },
   };
@@ -899,130 +899,129 @@ export default function SchoolProfileForm({
       setFieldErrors({});
 
       try {
+        // ← NAYA BLOCK — payload banane se PEHLE ye add karo
+        const customFields = [
+          ...(data.basicInfo.customFields ?? []).map((f) => ({ ...f, section: "basicInfo" })),
+          ...(data.about.customFields ?? []).map((f) => ({ ...f, section: "about" })),
+          ...(data.academics.customFields ?? []).map((f) => ({ ...f, section: "academics" })),
+          ...(data.admissions.customFields ?? []).map((f) => ({ ...f, section: "admissions" })),
+          ...(data.fees.customFeeHeads ?? []).map((f) => ({ ...f, section: "fees" })),
+          ...(data.facilities.customFields ?? []).map((f) => ({ ...f, section: "facilities" })),
+          ...(data.sports.customFields ?? []).map((f) => ({ ...f, section: "sports" })),
+          ...(data.programs.customFields ?? []).map((f) => ({ ...f, section: "programs" })),
+          ...(data.studentLife.customFields ?? []).map((f) => ({ ...f, section: "studentLife" })),
+          ...(data.achievements.customFields ?? []).map((f) => ({ ...f, section: "achievements" })),
+          ...(data.boardResults.customFields ?? []).map((f) => ({ ...f, section: "boardResults" })),
+        ].filter((f) => f.label?.trim() && f.value?.trim());
+
         const payload = {
           name: data.basicInfo.schoolName,
-          tagline: data.basicInfo.tagline || undefined,
+          tagline: data.basicInfo.tagline || null,
           establishedYear: data.basicInfo.establishedYear
             ? Number(data.basicInfo.establishedYear)
-            : undefined,
-          managementType: data.basicInfo.managementType || undefined,
-          schoolCategory: data.basicInfo.category || undefined,
-          schoolFormat: data.basicInfo.format || undefined,
-          schoolType: data.basicInfo.genderType || undefined,
+            : null,
+          managementType: data.basicInfo.managementType || null,
+          schoolCategory: data.basicInfo.category || null,
+          schoolFormat: data.basicInfo.format || null,
+          schoolType: data.basicInfo.genderType || null,
           board: data.basicInfo.board || null,
-          stateBoardName: data.basicInfo.stateBoardName || undefined,
+          stateBoardName: data.basicInfo.stateBoardName || undefined, // unchanged — backend-driven
           medium: data.basicInfo.medium || undefined,
           mediumOther:
             data.basicInfo.medium === "OTHER"
               ? data.basicInfo.mediumOther || undefined
-              : undefined,
+              : undefined, // unchanged — backend-driven
           city: data.basicInfo.city || undefined,
           state: data.basicInfo.state || undefined,
-          locality: data.basicInfo.locality || undefined, // ← ADD
-          address: data.basicInfo.address || undefined, // ← moved from contact.address, payload key unchanged
-          mapUrl: data.basicInfo.mapUrl || undefined, // ← moved from contact.mapUrl, payload key unchanged
-          latitude: data.basicInfo.latitude
-            ? Number(data.basicInfo.latitude)
-            : undefined,
-          longitude: data.basicInfo.longitude
-            ? Number(data.basicInfo.longitude)
-            : undefined,
-          affiliationNumber: data.basicInfo.affiliationNumber || undefined,
-          recognitionNumber: data.basicInfo.recognitionNumber || undefined,
-          affiliatedSince: data.basicInfo.affiliatedSince || undefined,
-          startTime: data.basicInfo.startTime || undefined,
-          endTime: data.basicInfo.endTime || undefined,
-          workingDays: data.basicInfo.workingDays || undefined,
-          uniformPolicy: data.basicInfo.uniformPolicy || undefined,
-          canteenAvailable: data.basicInfo.canteenAvailable || undefined,
-          logoUrl: data.basicInfo.logoUrl || undefined,
-          coverImageUrl: data.basicInfo.coverImageUrl || undefined,
+          locality: data.basicInfo.locality || undefined, // unchanged — backend-driven
+          address: data.basicInfo.address || null,
+          mapUrl: data.basicInfo.mapUrl || null,
+          latitude: data.basicInfo.latitude ? Number(data.basicInfo.latitude) : null,
+          longitude: data.basicInfo.longitude ? Number(data.basicInfo.longitude) : null,
+          affiliationNumber: data.basicInfo.affiliationNumber || null,
+          recognitionNumber: data.basicInfo.recognitionNumber || null,
+          affiliatedSince: data.basicInfo.affiliatedSince || null,
+          startTime: data.basicInfo.startTime || null,
+          endTime: data.basicInfo.endTime || null,
+          workingDays: data.basicInfo.workingDays || null,
+          uniformPolicy: data.basicInfo.uniformPolicy || null,
+          canteenAvailable: data.basicInfo.canteenAvailable || null,
+          logoUrl: data.basicInfo.logoUrl || null,
+          coverImageUrl: data.basicInfo.coverImageUrl || null,
           classesOffered: data.basicInfo.classesOffered ?? [],
           languagesOffered: data.basicInfo.languagesOffered ?? [],
 
-          description: data.about.about || undefined,
-          vision: data.about.vision || undefined,
-          mission: data.about.mission || undefined,
-          principalMessage: data.about.principalMessage || undefined,
+          description: data.about.about || null,
+          vision: data.about.vision || null,
+          mission: data.about.mission || null,
+          principalMessage: data.about.principalMessage || null,
 
           streamsOffered: data.academics.streamsOffered ?? [],
-          studentTeacherRatio: data.academics.studentTeacherRatio || undefined,
-          academicCalendar: data.academics.academicCalendar || undefined,
+          studentTeacherRatio: data.academics.studentTeacherRatio || null,
+          academicCalendar: data.academics.academicCalendar || null,
 
           admissionOpen: data.admissions.admissionOpen ?? false,
           admissionStartDate: data.admissions.startDate || undefined,
           admissionEndDate: data.admissions.endDate || undefined,
-          ageCriteria: data.admissions.ageCriteria || undefined,
-          requiredDocuments: data.admissions.requiredDocuments || undefined,
-          admissionProcess: data.admissions.admissionProcess || undefined,
+          ageCriteria: data.admissions.ageCriteria || null,
+          requiredDocuments: data.admissions.requiredDocuments || null,
+          admissionProcess: data.admissions.admissionProcess || null,
 
           averageAnnualFee: data.fees.averageAnnualFee
             ? Number(data.fees.averageAnnualFee)
-            : undefined,
+            : null,
           earlyChildhoodFee: data.fees.earlyChildhoodFee
             ? Number(data.fees.earlyChildhoodFee)
-            : undefined,
-          prePrimaryFee: data.fees.prePrimaryFee
-            ? Number(data.fees.prePrimaryFee)
-            : undefined,
-          class1to5Fee: data.fees.class1to5Fee
-            ? Number(data.fees.class1to5Fee)
-            : undefined,
-          class6to8Fee: data.fees.class6to8Fee
-            ? Number(data.fees.class6to8Fee)
-            : undefined,
-          class9to10Fee: data.fees.class9to10Fee
-            ? Number(data.fees.class9to10Fee)
-            : undefined,
+            : undefined, // unchanged — backend-driven
+          prePrimaryFee: data.fees.prePrimaryFee ? Number(data.fees.prePrimaryFee) : null,
+          class1to5Fee: data.fees.class1to5Fee ? Number(data.fees.class1to5Fee) : null,
+          class6to8Fee: data.fees.class6to8Fee ? Number(data.fees.class6to8Fee) : null,
+          class9to10Fee: data.fees.class9to10Fee ? Number(data.fees.class9to10Fee) : null,
           class11to12Fee: data.fees.class11to12Fee
             ? Number(data.fees.class11to12Fee)
-            : undefined,
+            : null,
 
           facilitiesList: data.facilities.items ?? [],
           facilityCustomGroups: data.facilities.customGroups ?? {},
           sportsList: data.sports.items ?? [],
           sportsCustomGroups: data.sports.customGroups ?? {},
 
-          campusArea: data.infrastructure.campusArea || undefined,
+          campusArea: data.infrastructure.campusArea || null,
           totalClassrooms: data.infrastructure.classrooms
             ? Number(data.infrastructure.classrooms)
-            : undefined,
-          totalLabs: data.infrastructure.labs
-            ? Number(data.infrastructure.labs)
-            : undefined,
+            : null,
+          totalLabs: data.infrastructure.labs ? Number(data.infrastructure.labs) : null,
           libraryBooks: data.infrastructure.libraryBooks
             ? Number(data.infrastructure.libraryBooks)
-            : undefined,
+            : null,
           hostelCapacity: data.infrastructure.hostelCapacity
             ? Number(data.infrastructure.hostelCapacity)
-            : undefined,
-          totalBuses: data.infrastructure.buses
-            ? Number(data.infrastructure.buses)
-            : undefined,
+            : null,
+          totalBuses: data.infrastructure.buses ? Number(data.infrastructure.buses) : null,
           totalStudents: data.infrastructure.totalStudents
             ? Number(data.infrastructure.totalStudents)
-            : undefined,
+            : null,
           totalTeachers: data.faculty.totalTeachers
             ? Number(data.faculty.totalTeachers)
-            : undefined,
+            : null,
           qualifiedTeachers: data.faculty.qualifiedTeachers
             ? Number(data.faculty.qualifiedTeachers)
-            : undefined,
-          trainingPrograms: data.faculty.trainingPrograms || undefined,
+            : null,
+          trainingPrograms: data.faculty.trainingPrograms || null,
 
           programsList: data.programs.items ?? [],
 
-          clubsActivities: data.studentLife.clubs || undefined,
-          culturalActivities: data.studentLife.culturalActivities || undefined,
-          annualEvents: data.studentLife.annualEvents || undefined,
-          educationalTours: data.studentLife.educationalTours || undefined,
+          clubsActivities: data.studentLife.clubs || null,
+          culturalActivities: data.studentLife.culturalActivities || null,
+          annualEvents: data.studentLife.annualEvents || null,
+          educationalTours: data.studentLife.educationalTours || null,
 
-          academicAchievements: data.achievements.academic || undefined,
-          sportsAchievements: data.achievements.sports || undefined,
+          academicAchievements: data.achievements.academic || null,
+          sportsAchievements: data.achievements.sports || null,
           awardsRecognitions:
             [data.achievements.awards, data.achievements.recognitions]
               .filter(Boolean)
-              .join("\n\n") || undefined,
+              .join("\n\n") || null,
 
           hostelAvailable: data.hostel.available ?? false,
           hostelBoys: data.hostel.boys ?? false,
@@ -1030,9 +1029,9 @@ export default function SchoolProfileForm({
           hostelMess: data.hostel.mess ?? false,
 
           transportAvailable: data.transport.available ?? false,
-          transportAreas: data.transport.coverageAreas || undefined,
+          transportAreas: data.transport.coverageAreas || null,
           gpsTracking: data.transport.gpsTracking ?? false,
-          totalVehicles: data.transport.vehicles || undefined,
+          totalVehicles: data.transport.vehicles || null,
 
           hasCCTV: data.safety.cctv ?? false,
           hasGuards: data.safety.guards ?? false,
@@ -1040,22 +1039,17 @@ export default function SchoolProfileForm({
           hasFireSafety: data.safety.fireSafety ?? false,
           hasVisitorMgmt: data.safety.visitorManagement ?? false,
 
-          phone: data.contact.phone || undefined,
-          whatsapp: data.contact.whatsapp || undefined,
-          email: data.contact.email || undefined,
-          website: data.contact.website || undefined,
-          //address: data.contact.address || undefined,
-          //mapUrl: data.contact.mapUrl || undefined,
-          facebook: data.contact.facebook || undefined,
-          instagram: data.contact.instagram || undefined,
-          youtube: data.contact.youtube || undefined,
-          linkedin: data.contact.linkedin || undefined,
+          phone: data.contact.phone || undefined, // unchanged — required field, can't null
+          whatsapp: data.contact.whatsapp || null,
+          email: data.contact.email || null,
+          website: data.contact.website || null,
+          facebook: data.contact.facebook || null,
+          instagram: data.contact.instagram || null,
+          youtube: data.contact.youtube || null,
+          linkedin: data.contact.linkedin || null,
           socialLinks: (data.contact.socialLinks ?? [])
             .filter((s) => s.platform?.trim() || s.url?.trim())
-            .map((s) => ({
-              platform: s.platform?.trim() || "",
-              url: s.url?.trim() || "",
-            })),
+            .map((s) => ({ platform: s.platform?.trim() || "", url: s.url?.trim() || "" })),
           additionalPhones: (data.contact.additionalPhones ?? [])
             .filter((phone) => phone.number?.trim() || phone.label?.trim())
             .map((phone) => ({
@@ -1064,25 +1058,18 @@ export default function SchoolProfileForm({
             })),
           admissionCoordinators: (data.contact.admissionCoordinators ?? [])
             .filter(
-              (coordinator) =>
-                coordinator.name?.trim() ||
-                coordinator.phone?.trim() ||
-                coordinator.email?.trim() ||
-                coordinator.designation?.trim(),
+              (c) => c.name?.trim() || c.phone?.trim() || c.email?.trim() || c.designation?.trim(),
             )
-            .map((coordinator) => ({
-              name: coordinator.name?.trim() || "",
-              phone: coordinator.phone?.trim() || "",
-              email: coordinator.email?.trim() || "",
-              designation: coordinator.designation?.trim() || "",
+            .map((c) => ({
+              name: c.name?.trim() || "",
+              phone: c.phone?.trim() || "",
+              email: c.email?.trim() || "",
+              designation: c.designation?.trim() || "",
             })),
 
-          admissionCoordinatorName:
-            data.contact.admissionCoordinators?.[0]?.name || undefined,
-          admissionPhone:
-            data.contact.admissionCoordinators?.[0]?.phone || undefined,
-          admissionEmail:
-            data.contact.admissionCoordinators?.[0]?.email || undefined,
+          admissionCoordinatorName: data.contact.admissionCoordinators?.[0]?.name || undefined,
+          admissionPhone: data.contact.admissionCoordinators?.[0]?.phone || undefined,
+          admissionEmail: data.contact.admissionCoordinators?.[0]?.email || undefined,
 
           boardResults: (data.boardResults.results ?? [])
             .filter((r) => r.year?.trim())
@@ -1105,17 +1092,12 @@ export default function SchoolProfileForm({
 
           faqs: (data.faqs.list ?? [])
             .filter((f) => f.question?.trim() && f.answer?.trim())
-            .map((f) => ({
-              question: f.question,
-              answer: f.answer,
-            })),
+            .map((f) => ({ question: f.question, answer: f.answer })),
 
           downloads: (data.downloads.files ?? [])
             .filter((d) => d.label?.trim() && d.url?.trim())
-            .map((d) => ({
-              label: d.label,
-              url: d.url,
-            })),
+            .map((d) => ({ label: d.label, url: d.url })),
+
           images: (data.gallery.images ?? [])
             .filter((img) => img.url?.trim())
             .map((img) => ({
@@ -1125,80 +1107,8 @@ export default function SchoolProfileForm({
               category: img.category?.trim() || undefined,
             })),
 
-          customFields: [
-            ...(data.basicInfo.customFields ?? []).map((f) => ({
-              section: "basicInfo",
-              label: f.label,
-              value: f.value,
-              fieldType: f.fieldType,
-            })),
-            ...(data.about.customFields ?? []).map((f) => ({
-              section: "about",
-              label: f.label,
-              value: f.value,
-              fieldType: f.fieldType,
-            })),
-            ...(data.academics.customFields ?? []).map((f) => ({
-              section: "academics",
-              label: f.label,
-              value: f.value,
-              fieldType: f.fieldType,
-            })),
-            ...(data.admissions.customFields ?? []).map((f) => ({
-              section: "admissions",
-              label: f.label,
-              value: f.value,
-              fieldType: f.fieldType,
-            })),
-            ...(data.fees.customFeeHeads ?? []).map((f) => ({
-              section: "fees",
-              label: f.label,
-              value: f.value,
-              fieldType: f.fieldType,
-            })),
-            ...(data.facilities.customFields ?? []).map((f) => ({
-              section: "facilities",
-              label: f.label,
-              value: f.value,
-              fieldType: f.fieldType,
-            })),
-            ...(data.sports.customFields ?? []).map((f) => ({
-              section: "sports",
-              label: f.label,
-              value: f.value,
-              fieldType: f.fieldType,
-            })),
-            ...(data.programs.customFields ?? []).map((f) => ({
-              section: "programs",
-              label: f.label,
-              value: f.value,
-              fieldType: f.fieldType,
-            })),
-            ...(data.studentLife.customFields ?? []).map((f) => ({
-              section: "studentLife",
-              label: f.label,
-              value: f.value,
-              fieldType: f.fieldType,
-            })),
-            ...(data.achievements.customFields ?? []).map((f) => ({
-              section: "achievements",
-              label: f.label,
-              value: f.value,
-              fieldType: f.fieldType,
-            })),
-            ...(data.boardResults.customFields ?? []).map((f) => ({
-              section: "boardResults",
-              label: f.label,
-              value: f.value,
-              fieldType: f.fieldType,
-            })),
-            ...(data.hostel.customFields ?? []).map((f) => ({
-              section: "hostel",
-              label: f.label,
-              value: f.value,
-              fieldType: f.fieldType,
-            })),
-          ].filter((f) => f.label?.trim() && f.value?.trim()),
+          // ← BADLA — pehle yahan inline empty array tha, ab upar compute kiya hua variable
+          customFields,
         };
 
         const res = await fetch(submitEndpoint, {
@@ -1216,7 +1126,6 @@ export default function SchoolProfileForm({
           } else if (parsed.category === "auth") {
             setSaveError(parsed.message);
             setTimeout(() => {
-              // ← YAHAN CHANGE KARO
               const isAdmin = submitEndpoint.startsWith("/api/admin/");
               window.location.href = isAdmin ? "/admin-login" : "/school-login";
             }, 2000);
