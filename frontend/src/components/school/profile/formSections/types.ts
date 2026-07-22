@@ -14,6 +14,7 @@ export interface SectionProps {
   watch: UseFormWatch<SchoolProfileFormData>;
   setValue: UseFormSetValue<SchoolProfileFormData>;
   isLoading?: boolean;
+  isAdmin?: boolean; // gates admin-only fields, e.g. slug edit in BasicInfoSection
 }
 
 export interface CustomField {

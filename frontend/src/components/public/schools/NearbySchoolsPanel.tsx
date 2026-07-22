@@ -22,6 +22,24 @@ const BOARD_LABEL: Record<string, string> = {
   OTHER: "Other Board",
 };
 
+// Builds a location line while skipping parts already contained in a
+// previous part (address sometimes already includes locality/city/state).
+function buildLocationLine(parts: Array<string | null | undefined>) {
+  const result: string[] = [];
+  for (const raw of parts) {
+    const part = raw?.trim();
+    if (!part) continue;
+    const norm = part.toLowerCase();
+    const alreadyPresent = result.some((r) => {
+      const rNorm = r.toLowerCase();
+      return rNorm.includes(norm) || norm.includes(rNorm);
+    });
+    if (alreadyPresent) continue;
+    result.push(part);
+  }
+  return result.join(", ");
+}
+
 /**
  * Nearby Schools card on the school detail page — with a live radius selector.
  * Initial data comes server-rendered (SSR) at DEFAULT_RADIUS_KM; changing the
@@ -104,59 +122,71 @@ export default function NearbySchoolsPanel({
         </p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {schools.map((school) => (
-            <Link
-              key={school.id}
-              href={`/schools/${school.slug}`}
-              className="group rounded-2xl border border-gray-100 bg-gray-50 hover:bg-blue-50 hover:border-blue-200 transition-colors p-4"
-            >
-              <div className="flex items-start gap-3">
-                <div className="w-12 h-12 rounded-xl bg-white border border-blue-100 flex items-center justify-center shrink-0 overflow-hidden">
-                  {school.logoUrl ? (
-                    <Image
-                      src={optimizeCloudinaryUrl(school.logoUrl, { width: 96 }) ?? school.logoUrl}
-                      alt=""
-                      width={48}
-                      height={48}
-                      loading="lazy"
-                      placeholder="blur"
-                      blurDataURL={IMAGE_BLUR_DATA_URL}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="font-heading font-bold text-blue-600 text-sm">
-                      {school.name.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase()}
-                    </span>
-                  )}
-                </div>
+          {schools.map((school) => {
+            // Full address line — falls back to locality/city/state if address is missing,
+            // and skips any part already contained in an earlier part.
+            const locationLine = buildLocationLine([
+              school.address,
+              school.locality,
+              school.city,
+              school.state,
+            ]);
 
-                <div className="min-w-0 flex-1">
-                  <h3 className="font-heading font-semibold text-body text-gray-800 line-clamp-2 group-hover:text-blue-700 transition-colors">
-                    {school.name}
-                  </h3>
-                  <p className="font-body text-label text-gray-500 mt-1 truncate">
-                    {school.locality ? `${school.locality}, ` : ""}
-                    {school.city}, {school.state}
-                  </p>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <span className="px-2 py-0.5 rounded-full bg-white border border-gray-100 text-meta text-gray-600">
-                      {BOARD_LABEL[school.board as string] ?? school.board}
-                    </span>
-                    {typeof school.distanceKm === "number" && (
-                      <span className="px-2 py-0.5 rounded-full bg-blue-100 border border-blue-200 text-meta text-blue-700">
-                        {school.distanceKm} km away
-                      </span>
-                    )}
-                    {school.coordinatesApproximate && (
-                      <span className="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-meta text-amber-700">
-                        Approx. location
+            return (
+              <Link
+                key={school.id}
+                href={`/schools/${school.slug}`}
+                className="group rounded-2xl border border-gray-100 bg-gray-50 hover:bg-blue-50 hover:border-blue-200 transition-colors p-4"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-white border border-blue-100 flex items-center justify-center shrink-0 overflow-hidden">
+                    {school.logoUrl ? (
+                      <Image
+                        src={optimizeCloudinaryUrl(school.logoUrl, { width: 96 }) ?? school.logoUrl}
+                        alt=""
+                        width={48}
+                        height={48}
+                        loading="lazy"
+                        placeholder="blur"
+                        blurDataURL={IMAGE_BLUR_DATA_URL}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="font-heading font-bold text-blue-600 text-sm">
+                        {school.name.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase()}
                       </span>
                     )}
                   </div>
+
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-heading font-semibold text-body text-gray-800 line-clamp-2 group-hover:text-blue-700 transition-colors">
+                      {school.name}
+                    </h3>
+                    <p className="font-body text-label text-gray-500 mt-1 line-clamp-2">
+                      {locationLine || "Address not available"}
+                    </p>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {school.board && (
+                        <span className="px-2 py-0.5 rounded-full bg-white border border-gray-100 text-meta text-gray-600">
+                          {BOARD_LABEL[school.board as string] ?? school.board}
+                        </span>
+                      )}
+                      {typeof school.distanceKm === "number" && (
+                        <span className="px-2 py-0.5 rounded-full bg-blue-100 border border-blue-200 text-meta text-blue-700">
+                          {school.distanceKm} km away
+                        </span>
+                      )}
+                      {school.coordinatesApproximate && (
+                        <span className="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-meta text-amber-700">
+                          Approx. location
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       )}
     </section>

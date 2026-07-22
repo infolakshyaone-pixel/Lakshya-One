@@ -35,6 +35,7 @@ export type SchoolListItem = {
   slug: string;
   city: string;
   state: string;
+  address: string | null;
   board: BoardType;
   stateBoardName: string | null;
   schoolType: SchoolType;

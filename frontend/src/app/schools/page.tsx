@@ -219,9 +219,9 @@ async function SchoolGrid({ searchParams }: PageProps) {
   if (isNearMe) {
     const radiusKm = Number(searchParams.radius) || 5;
     const nearby = await fetchNearbySchools(
-      { lat, lng, radius: radiusKm, limit: 24 },
-      { revalidate: 60 },
-    );
+  { lat, lng, radius: radiusKm },
+  { revalidate: 60 },
+);
 
     return (
       <>

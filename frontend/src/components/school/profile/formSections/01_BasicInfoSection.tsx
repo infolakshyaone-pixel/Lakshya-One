@@ -253,6 +253,7 @@ export default function BasicInfoSection({
   errors,
   watch,
   setValue,
+  isAdmin,
 }: SectionProps) {
   const {
     fields: customFields,
@@ -339,6 +340,27 @@ export default function BasicInfoSection({
               {...register("basicInfo.schoolName")}
             />
           </FormField>
+
+          {/* URL Slug — admin only, changing this breaks the old public URL */}
+          {isAdmin && (
+            <FormField
+              label="URL Slug"
+              htmlFor="slug"
+              error={errors.basicInfo?.slug?.message}
+            >
+              <Input
+                id="slug"
+                placeholder="e.g. dps-varanasi"
+                className={cn(inputClass, errors.basicInfo?.slug && inputErrorClass)}
+                {...register("basicInfo.slug")}
+              />
+              <p className="font-body text-meta text-gray-400 mt-1">
+                Used in the school&apos;s public URL: /schools/&lt;slug&gt;. Changing
+                this breaks the old link — lowercase letters, numbers, and hyphens
+                only.
+              </p>
+            </FormField>
+          )}
 
           {/* Tagline */}
           <FormField label="School Tagline" htmlFor="tagline">
@@ -630,26 +652,26 @@ export default function BasicInfoSection({
               />
             </FormField>
             <FormField label="Full Address">
-            <textarea
-              className="w-full min-h-[90px] rounded-xl border border-gray-100 bg-gray-50 font-body text-body text-gray-800 placeholder:text-gray-400 focus-visible:ring-blue-400 focus:bg-white transition-colors px-3 py-2.5 resize-none outline-none focus-visible:ring-2 focus-visible:ring-offset-0"
-              placeholder="Street, locality, city, state, PIN code"
-              rows={3}
-              {...register("basicInfo.address")}
-            />
-          </FormField>
+              <textarea
+                className="w-full min-h-[90px] rounded-xl border border-gray-100 bg-gray-50 font-body text-body text-gray-800 placeholder:text-gray-400 focus-visible:ring-blue-400 focus:bg-white transition-colors px-3 py-2.5 resize-none outline-none focus-visible:ring-2 focus-visible:ring-offset-0"
+                placeholder="Street, locality, city, state, PIN code"
+                rows={3}
+                {...register("basicInfo.address")}
+              />
+            </FormField>
 
-          <FormField label="Google Maps Embed URL">
-            <Input
-              type="url"
-              placeholder="Paste Google Maps embed link here"
-              className={inputClass}
-              {...register("basicInfo.mapUrl")}
-            />
-            <p className="font-body text-meta text-gray-400 mt-1">
-              Google Maps → Share → copy the{" "}
-              <code className="text-xs bg-gray-100 px-1 rounded">src</code> URL
-            </p>
-          </FormField>
+            <FormField label="Google Maps Embed URL">
+              <Input
+                type="url"
+                placeholder="Paste Google Maps embed link here"
+                className={inputClass}
+                {...register("basicInfo.mapUrl")}
+              />
+              <p className="font-body text-meta text-gray-400 mt-1">
+                Google Maps → Share → copy the{" "}
+                <code className="text-xs bg-gray-100 px-1 rounded">src</code> URL
+              </p>
+            </FormField>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <FormField

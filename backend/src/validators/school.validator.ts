@@ -145,6 +145,23 @@ const schoolBodyFields = {
     preprocessTrim,
     z.string().min(3, "School name is required"),
   ),
+
+
+// Admin-only editable slug (school admin never sends this — gated in controller)
+slug: z.preprocess(
+  preprocessNullableString,
+  z
+    .string()
+    .min(3, "Slug must be at least 3 characters")
+    .max(100, "Slug must be at most 100 characters")
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      "Slug can only contain lowercase letters, numbers, and hyphens",
+    )
+    .nullable()
+    .optional(),
+),
+
   city: z.preprocess(preprocessTrim, z.string().min(2, "City is required")),
   state: z.preprocess(preprocessTrim, z.string().min(2, "State is required")),
   address: z.preprocess(

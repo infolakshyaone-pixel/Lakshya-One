@@ -83,6 +83,8 @@ model School {
   longitude                Float?
   locality                 String?            
   coordinatesApproximate   Boolean             @default(false)  
+  hasManualCoords          Boolean             @default(false)   // ← ADD THIS LINE
+
   board                    BoardType?          
   schoolType               SchoolType?         
   medium                   MediumType?         

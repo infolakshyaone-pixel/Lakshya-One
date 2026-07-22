@@ -119,7 +119,7 @@ export async function fetchNearbySchools(
 ): Promise<NearbySchool[]> {
   if (!API_BASE) return [];
 
-  const { lat, lng, radius = 10, limit = 6, excludeId } = params;
+  const { lat, lng, radius = 10, limit, excludeId } = params;
 
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
     return [];
@@ -129,7 +129,9 @@ export async function fetchNearbySchools(
   query.set("lat", String(lat));
   query.set("lng", String(lng));
   query.set("radius", String(radius));
+if (limit !== undefined) {
   query.set("limit", String(limit));
+}
 
   if (excludeId) {
     query.set("excludeId", excludeId);

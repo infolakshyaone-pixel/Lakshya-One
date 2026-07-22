@@ -49,6 +49,7 @@ import {
   geocodeLocality,
   geocodeCity,
   normalizeLocality,
+  extractCoordsFromMapUrl,
 } from "../lib/geocoding";
 // ── Transaction config (production-safe for Neon + pgbouncer) ─────────────────
 
@@ -105,9 +106,9 @@ function calculateDistanceKm(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
@@ -791,6 +792,7 @@ export const getSchools = async (req: Request, res: Response) => {
       medium: medium as string,
       managementType: managementType as string,
       locality: locality as string,
+      schoolCategory: schoolCategory as string,
       featured: featured as string,
     });
 
@@ -845,6 +847,7 @@ export const getSchools = async (req: Request, res: Response) => {
     medium: medium as string,
     managementType: managementType as string,
     locality: locality as string,
+    schoolCategory: schoolCategory as string,
     featured: featured as string,
   });
 
@@ -916,7 +919,8 @@ export const getNearbySchools = async (req: Request, res: Response) => {
   const lat = toFiniteNumber(req.query.lat);
   const lng = toFiniteNumber(req.query.lng ?? req.query.lon);
   const radiusKmRaw = toFiniteNumber(req.query.radius);
-  const limit = parseLimit(req.query.limit, 10, 50);
+  const hasLimitParam = req.query.limit !== undefined;
+  const limit = hasLimitParam ? parseLimit(req.query.limit, 10, 500) : null;
   const excludeId =
     typeof req.query.excludeId === "string" ? req.query.excludeId.trim() : "";
 
@@ -937,7 +941,7 @@ export const getNearbySchools = async (req: Request, res: Response) => {
     lat,
     lng,
     radiusKm,
-    limit,
+    limit: limit ?? "all",
     excludeId,
   });
 
@@ -961,16 +965,18 @@ export const getNearbySchools = async (req: Request, res: Response) => {
           },
           ...(excludeId ? { id: { not: excludeId } } : {}),
         },
-        take: Math.max(limit * 4, limit),
+        // No `take` cap here — bounding box already limits rows to the
+        // rough area; every match within it is fetched, then filtered
+        // precisely by the Haversine radius check below.
         orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
         select: schoolListSelect,
       });
 
-      return rows
+      const withDistance = rows
         .map((school) => {
           const distanceKm =
             typeof school.latitude === "number" &&
-            typeof school.longitude === "number"
+              typeof school.longitude === "number"
               ? calculateDistanceKm(lat, lng, school.latitude, school.longitude)
               : null;
 
@@ -993,8 +999,11 @@ export const getNearbySchools = async (req: Request, res: Response) => {
 
           if (distanceA !== distanceB) return distanceA - distanceB;
           return Number(b.isFeatured) - Number(a.isFeatured);
-        })
-        .slice(0, limit);
+        });
+
+      // Only trim to `limit` if the caller explicitly asked for one
+      // (e.g. the school detail page's small "Nearby Schools" widget).
+      return limit ? withDistance.slice(0, limit) : withDistance;
     },
   );
 
@@ -1090,6 +1099,8 @@ export const getSchool = async (req: AuthRequest, res: Response) => {
 
 // ── POST /api/schools — create school ────────────────────────────────────────
 
+// ── POST /api/schools — create school ────────────────────────────────────────
+
 export const createSchool = async (req: AuthRequest, res: Response) => {
   const rawBody = req.body as Record<string, unknown>;
   const data = sanitizeSchoolData(req.body as CreateSchoolInput);
@@ -1111,6 +1122,20 @@ export const createSchool = async (req: AuthRequest, res: Response) => {
     readInputField(rawBody, data, "locality", "basicInfo"),
   );
 
+  // ── Resolve coordinates: manual lat/lng first, then try the map link ────
+  let resolvedLatitude = data.latitude ?? null;
+  let resolvedLongitude = data.longitude ?? null;
+  let hasManualCoords = resolvedLatitude != null && resolvedLongitude != null;
+
+  if (!hasManualCoords && data.mapUrl) {
+    const mapCoords = await extractCoordsFromMapUrl(data.mapUrl);
+    if (mapCoords) {
+      resolvedLatitude = mapCoords.latitude;
+      resolvedLongitude = mapCoords.longitude;
+      hasManualCoords = true;
+    }
+  }
+
   const school = await prisma.school.create({
     data: {
       name: data.name,
@@ -1121,10 +1146,10 @@ export const createSchool = async (req: AuthRequest, res: Response) => {
       state: data.state,
       pincode: data.pincode ?? null,
       locality: locality,
-      latitude: data.latitude ?? null,
-      longitude: data.longitude ?? null,
+      latitude: resolvedLatitude,
+      longitude: resolvedLongitude,
       // updateSchool me (geocoding priority check ke liye):
-      hasManualCoords: data.latitude != null && data.longitude != null,
+      hasManualCoords,
       board: data.board,
       stateBoardName: data.board === "STATE_BOARD" ? stateBoardName : null,
       schoolType: data.schoolType,
@@ -1159,11 +1184,13 @@ export const createSchool = async (req: AuthRequest, res: Response) => {
     address: school.address,
     city: school.city,
     state: school.state,
-    hasManualCoords: data.latitude != null && data.longitude != null,
-});
+    hasManualCoords,
+  });
 
   res.status(201).json({ data: school });
 };
+
+// ── PATCH /api/schools/:id — update school ────────────────────────────────────
 
 // ── PATCH /api/schools/:id — update school ────────────────────────────────────
 
@@ -1176,7 +1203,7 @@ export const updateSchool = async (req: AuthRequest, res: Response) => {
 
   const existing = await prisma.school.findUnique({
     where: { id },
-    select: { id: true, ownerId: true },
+    select: { id: true, ownerId: true, slug: true },
   });
 
   if (!existing) throw Errors.NotFound("School");
@@ -1191,11 +1218,52 @@ export const updateSchool = async (req: AuthRequest, res: Response) => {
   const scalars = extractScalarFields(data);
   const manualFields = buildManualSchoolFields(rawBody, data);
 
+  // ── Admin-only: slug edit, gated + uniqueness-checked ────────────────────
+  if (scalars.slug !== undefined) {
+    if (req.user!.role !== "ADMIN") {
+      // School admins can never change slug, even if they send it
+      delete (scalars as Prisma.SchoolUpdateInput).slug;
+    } else {
+      const requestedSlug = scalars.slug as string | null;
+
+      if (!requestedSlug || requestedSlug === existing.slug) {
+        // No real change requested — don't touch the column
+        delete (scalars as Prisma.SchoolUpdateInput).slug;
+      } else {
+        const slugTaken = await prisma.school.findUnique({
+          where: { slug: requestedSlug },
+          select: { id: true },
+        });
+
+        if (slugTaken && slugTaken.id !== id) {
+          throw Errors.Conflict("This slug is already in use by another school");
+        }
+        // else: scalars.slug stays as-is, will be persisted below
+      }
+    }
+  }
+
   // ADD THIS — captured here for use after the transaction commits:
   const localityForGeocode =
     "locality" in manualFields
       ? (manualFields.locality as string | null)
       : undefined;
+
+  // ── Resolve coordinates: manual lat/lng wins; otherwise try the map link ──
+  let hasManualCoords = data.latitude != null && data.longitude != null;
+
+  if (!hasManualCoords && data.mapUrl) {
+    const mapCoords = await extractCoordsFromMapUrl(data.mapUrl);
+    if (mapCoords) {
+      (scalars as Prisma.SchoolUpdateInput).latitude = mapCoords.latitude;
+      (scalars as Prisma.SchoolUpdateInput).longitude = mapCoords.longitude;
+      hasManualCoords = true;
+    }
+  }
+
+  if (hasManualCoords) {
+    (scalars as Prisma.SchoolUpdateInput).hasManualCoords = true;
+  }
 
   const jsonFields: Prisma.SchoolUpdateInput = {};
 
@@ -1269,15 +1337,16 @@ export const updateSchool = async (req: AuthRequest, res: Response) => {
   invalidateSchoolCache();
 
   // ADD THIS — only trigger if locality was actually sent in this update,
-  // and only if the admin hasn't manually set lat/lng in this same request.
-  if (localityForGeocode !== undefined) {
-   void scheduleLocalityGeocode({
+  // OR if we just resolved fresh coordinates (manual/map-link) that need
+  // to be persisted through scheduleLocalityGeocode's early-return guard.
+  if (localityForGeocode !== undefined || hasManualCoords) {
+    void scheduleLocalityGeocode({
       schoolId: id,
-      locality: localityForGeocode,
+      locality: localityForGeocode ?? updated.locality,
       address: updated.address,
       city: updated.city,
       state: updated.state,
-      hasManualCoords: data.latitude != null && data.longitude != null,
+      hasManualCoords,
     });
   }
 

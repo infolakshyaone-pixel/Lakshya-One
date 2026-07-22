@@ -456,6 +456,25 @@ function getDirectionsUrl(school: SchoolDetail) {
   )}`;
 }
 
+// Builds a location line while avoiding repeated fragments — many schools have
+// address values that already include locality/city/state, so we skip a part
+// if it's already contained in what's been added so far.
+function buildLocationLine(parts: Array<string | null | undefined>) {
+  const result: string[] = [];
+  for (const raw of parts) {
+    const part = raw?.trim();
+    if (!part) continue;
+    const norm = part.toLowerCase();
+    const alreadyPresent = result.some((r) => {
+      const rNorm = r.toLowerCase();
+      return rNorm.includes(norm) || norm.includes(rNorm);
+    });
+    if (alreadyPresent) continue;
+    result.push(part);
+  }
+  return result.join(", ");
+}
+
 function getSocialLinks(school: SchoolDetail): SocialLink[] {
   const fixedLinks: Array<SocialLink | null> = [
     school.facebook ? { platform: "Facebook", url: school.facebook } : null,
@@ -830,13 +849,12 @@ export default async function SchoolDetailPage({
                 <FavouriteButton
                   schoolId={school.id}
                   initialFavourited={initialFavourited}
+                  variant="dark"
                 />
               </div>
 
               <p className="text-blue-200 text-body mt-1">
-                {school.address}
-                {school.locality ? `, ${school.locality}` : ""}, {school.city}, {school.state}
-                {school.pincode ? ` — ${school.pincode}` : ""}
+                {buildLocationLine([school.address, school.state])}
               </p>
 
               {/* Badges */}
@@ -888,7 +906,7 @@ export default async function SchoolDetailPage({
       {/* ── Main Content ─────────────────────────────────────── */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* ── Left — Main Sections ── */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 lg:col-start-1 lg:row-start-1 order-1 space-y-6">
           {/* About */}
           {hasAbout(school) && (
             <SectionCard title="About">
@@ -1712,20 +1730,24 @@ export default async function SchoolDetailPage({
               </div>
             </SectionCard>
           )}
+        </div>
 
-          {/* Nearby Schools */}
-          {hasCoordinates(school) && (
+        {/* ── Nearby Schools — own grid item ── */}
+        {/* Mobile (grid-cols-1): order-3 → renders last, after the sidebar */}
+        {/* Desktop (lg:grid-cols-3): pinned into row 2 of the left column, same visual spot as before */}
+        {hasCoordinates(school) && (
+          <div className="order-3 lg:order-2 lg:col-span-2 lg:col-start-1 lg:row-start-2">
             <NearbySchoolsPanel
               initialSchools={nearbySchools}
               lat={school.latitude as number}
               lng={school.longitude as number}
               excludeId={school.id}
             />
-          )}
-        </div>
+          </div>
+        )}
 
         {/* ── Right Sidebar ── */}
-        <div className="space-y-5">
+        <div className="space-y-5 order-2 lg:order-3 lg:col-start-3 lg:row-start-1 lg:row-span-2">
           <div className="bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden sticky top-24">
             {/* CTA Block */}
             <div className="bg-blue-600 p-5 text-center">
@@ -1816,11 +1838,24 @@ export default async function SchoolDetailPage({
                   </a>
                 )}
 
-                <div className="flex items-start gap-3">
+                {/* <div className="flex items-start gap-3">
                   <ContactIcon icon="address" />
                   <span className="font-body text-body text-gray-800 leading-relaxed">
                     {school.address}
                     {school.locality ? `, ${school.locality}` : ""}, {school.city}, {school.state}
+                    {school.pincode ? ` — ${school.pincode}` : ""}
+                  </span>
+                </div> */}
+
+                <div className="flex items-start gap-3">
+                  <ContactIcon icon="address" />
+                  <span className="font-body text-body text-gray-800 leading-relaxed">
+                    {buildLocationLine([
+                      school.address,
+                      school.locality,
+                      school.city,
+                      school.state,
+                    ])}
                     {school.pincode ? ` — ${school.pincode}` : ""}
                   </span>
                 </div>
@@ -2082,12 +2117,19 @@ function NearbySchoolsSection({ schools }: { schools: NearbySchool[] }) {
                   {school.city}, {school.state}
                 </p>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  <span className="px-2 py-0.5 rounded-full bg-white border border-gray-100 text-meta text-gray-600">
-                    {school.board ? (BOARD_LABEL[school.board] ?? school.board) : "Board not set"}
-                  </span>
+                  {school.board && (
+                    <span className="px-2 py-0.5 rounded-full bg-white border border-gray-100 text-meta text-gray-600">
+                      {BOARD_LABEL[school.board as string] ?? school.board}
+                    </span>
+                  )}
                   {typeof school.distanceKm === "number" && (
                     <span className="px-2 py-0.5 rounded-full bg-blue-100 border border-blue-200 text-meta text-blue-700">
                       {school.distanceKm} km away
+                    </span>
+                  )}
+                  {school.coordinatesApproximate && (
+                    <span className="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-meta text-amber-700">
+                      Approx. location
                     </span>
                   )}
                 </div>

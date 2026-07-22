@@ -25,6 +25,7 @@ export interface SchoolCardProps {
   slug: string;
   city: string;
   state: string;
+  address?: string | null;
   board: "CBSE" | "ICSE" | "IB" | "IGCSE" | "NIOS" | "STATE_BOARD" | "OTHER" | null;
   stateBoardName?: string | null;
   schoolType: "BOYS" | "GIRLS" | "CO_ED" | null;
@@ -151,6 +152,7 @@ function SchoolCardComponent(props: SchoolCardProps) {
     slug,
     city,
     state,
+    address,
     board,
     stateBoardName,
     schoolType,
@@ -227,38 +229,41 @@ function SchoolCardComponent(props: SchoolCardProps) {
       <div className="p-5 flex flex-col flex-1">
         <Link href={`/schools/${slug}`} className="flex flex-col flex-1">
           {/* Header: logo + name + location */}
-          <div className="flex items-start gap-4 mb-4">
-            <div className="relative flex-shrink-0 w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-50 to-white border border-blue-100 shadow-sm flex items-center justify-center ring-2 ring-white">
-              {optimizedLogoUrl ? (
-                <Image
-                  src={optimizedLogoUrl}
-                  alt=""
-                  width={64}
-                  height={64}
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  loading="lazy"
-                  placeholder="blur"
-                  blurDataURL={IMAGE_BLUR_DATA_URL}
-                  className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
-                />
-              ) : (
-                <span className="font-heading font-bold text-blue-600 text-xl leading-none">
-                  {getInitials(name)}
-                </span>
-              )}
-            </div>
+          <div className="mb-4">
+            <div className="flex items-start gap-4">
+              <div className="relative flex-shrink-0 w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-50 to-white border border-blue-100 shadow-sm flex items-center justify-center ring-2 ring-white">
+                {optimizedLogoUrl ? (
+                  <Image
+                    src={optimizedLogoUrl}
+                    alt=""
+                    width={64}
+                    height={64}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    loading="lazy"
+                    placeholder="blur"
+                    blurDataURL={IMAGE_BLUR_DATA_URL}
+                    className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <span className="font-heading font-bold text-blue-600 text-xl leading-none">
+                    {getInitials(name)}
+                  </span>
+                )}
+              </div>
 
-            <div className="min-w-0 flex-1">
-              <h3 className="font-heading font-semibold text-h3 text-gray-800 leading-tight line-clamp-2 group-hover:text-blue-600 transition-colors">
+              <div className="min-w-0 flex-1">
+                <h3 className="font-heading font-semibold text-h3 text-gray-800 leading-tight line-clamp-2 group-hover:text-blue-600 transition-colors">
                 {name}
               </h3>
-              <p className="font-body text-label text-gray-500 mt-1 flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 shrink-0 text-blue-400" aria-hidden />
-                <span className="truncate">
-                  {city}, {state}
-                </span>
-              </p>
+              </div>
             </div>
+
+            <p className="font-body text-label text-gray-500 mt-2.5 flex items-start gap-1">
+              <MapPin className="w-3.5 h-3.5 shrink-0 text-blue-400 mt-0.5" aria-hidden />
+              <span className="line-clamp-2">
+                {address ? `${address}, ${state}` : `${city}, ${state}`}
+              </span>
+            </p>
           </div>
 
           {/* Badges: board, type, medium */}

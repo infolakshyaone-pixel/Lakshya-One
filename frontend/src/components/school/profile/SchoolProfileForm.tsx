@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -33,6 +33,13 @@ import {
 } from "./formSections";
 import type { SectionProps } from "./formSections/types";
 import { parseApiError } from "@/lib/api/error";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/shared/ui/dialog";
 
 // ─────────────────────────────────────────────────────────────
 // Sub-schemas
@@ -106,6 +113,14 @@ const optionalLongitudeSchema = z
 export const schoolProfileSchema = z.object({
   basicInfo: z.object({
     schoolName: z.string().min(3, "School name must be at least 3 characters"),
+    slug: z
+      .string()
+      .optional()
+      .or(z.literal(""))
+      .refine((value) => {
+        if (!value) return true;
+        return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
+      }, "Use lowercase letters, numbers, and hyphens only (e.g. dps-varanasi)"),
     tagline: z.string().optional(),
     establishedYear: z.string().optional(),
     managementType: z.string().optional(),
@@ -477,6 +492,7 @@ function mapSchoolToFormData(
   return {
     basicInfo: {
       schoolName: (school.name as string) || "",
+      slug: (school.slug as string) || "",
       tagline: (school.tagline as string) || "",
       establishedYear: toStringValue(school.establishedYear),
       managementType: (school.managementType as string) || "",
@@ -811,6 +827,14 @@ export default function SchoolProfileForm({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+  // Slug edit is admin-only; derived the same way the auth-redirect logic already does
+  const isAdmin = submitEndpoint.startsWith("/api/admin/");
+  const initialSlugRef = useRef<string>(String(school.slug ?? ""));
+
+  const [pendingSubmitData, setPendingSubmitData] =
+    useState<SchoolProfileFormData | null>(null);
+  const [slugConfirmOpen, setSlugConfirmOpen] = useState(false);
+
   const schoolId = String(school.id ?? "unknown");
 
   const {
@@ -860,6 +884,7 @@ export default function SchoolProfileForm({
     watch,
     setValue,
     isLoading: saving,
+    isAdmin,
   };
 
   const sections = [
@@ -891,7 +916,7 @@ export default function SchoolProfileForm({
   const isFirst = activeSection === 0;
   const isLast = activeSection === totalSections - 1;
 
-  const onSubmit = useCallback(
+  const performSave = useCallback(
     async (data: SchoolProfileFormData) => {
       setSaving(true);
       setSaveError(null);
@@ -914,8 +939,14 @@ export default function SchoolProfileForm({
           ...(data.boardResults.customFields ?? []).map((f) => ({ ...f, section: "boardResults" })),
         ].filter((f) => f.label?.trim() && f.value?.trim());
 
+        const slugChanged =
+          isAdmin &&
+          !!data.basicInfo.slug &&
+          data.basicInfo.slug.trim() !== initialSlugRef.current;
+
         const payload = {
           name: data.basicInfo.schoolName,
+          ...(slugChanged ? { slug: data.basicInfo.slug!.trim() } : {}), // ← ADD THIS
           tagline: data.basicInfo.tagline || null,
           establishedYear: data.basicInfo.establishedYear
             ? Number(data.basicInfo.establishedYear)
@@ -1126,7 +1157,7 @@ export default function SchoolProfileForm({
           } else if (parsed.category === "auth") {
             setSaveError(parsed.message);
             setTimeout(() => {
-              const isAdmin = submitEndpoint.startsWith("/api/admin/");
+              //const isAdmin = submitEndpoint.startsWith("/api/admin/");
               window.location.href = isAdmin ? "/admin-login" : "/school-login";
             }, 2000);
           } else {
@@ -1139,6 +1170,9 @@ export default function SchoolProfileForm({
         if (!disableDraft) {
           localStorage.removeItem(DRAFT_KEY(schoolId));
         }
+        if (slugChanged) {
+          initialSlugRef.current = data.basicInfo.slug!.trim();
+        }
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
       } catch (networkErr: unknown) {
@@ -1148,8 +1182,27 @@ export default function SchoolProfileForm({
         setSaving(false);
       }
     },
-    [schoolId, submitEndpoint, disableDraft],
+    [schoolId, submitEndpoint, disableDraft, isAdmin],
   );
+
+  const onSubmit = useCallback(
+  (data: SchoolProfileFormData) => {
+    const slugChanged =
+      isAdmin &&
+      !!data.basicInfo.slug &&
+      data.basicInfo.slug.trim() !== initialSlugRef.current;
+
+    if (slugChanged) {
+      setPendingSubmitData(data);
+      setSlugConfirmOpen(true);
+      return;
+    }
+
+    void performSave(data);
+  },
+  [isAdmin, performSave],
+);
+
 
   return (
     <div className="flex gap-6 min-h-screen">
@@ -1255,6 +1308,50 @@ export default function SchoolProfileForm({
           </div>
         </form>
       </div>
+
+       <Dialog open={slugConfirmOpen} onOpenChange={setSlugConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change this school&apos;s URL?</DialogTitle>
+          </DialogHeader>
+          <p className="font-body text-sm text-gray-600">
+            This will change the school&apos;s public URL from{" "}
+            <code className="text-xs bg-gray-100 px-1 rounded">
+              /schools/{initialSlugRef.current}
+            </code>{" "}
+            to{" "}
+            <code className="text-xs bg-gray-100 px-1 rounded">
+              /schools/{pendingSubmitData?.basicInfo.slug}
+            </code>
+            . The old link will stop working immediately.
+          </p>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setSlugConfirmOpen(false);
+                setPendingSubmitData(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={() => {
+                setSlugConfirmOpen(false);
+                if (pendingSubmitData) void performSave(pendingSubmitData);
+                setPendingSubmitData(null);
+              }}
+            >
+              Yes, change the URL
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
     </div>
   );
 }
