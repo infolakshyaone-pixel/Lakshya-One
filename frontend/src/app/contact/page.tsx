@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import ContactForm from "./ContactForm";
-import { Mail, Phone, MapPin, Facebook, Instagram } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Contact Us | Lakshya One",
@@ -11,12 +11,17 @@ const SOCIAL_LINKS = [
   {
     icon: Facebook,
     label: "Facebook",
-    href: "https://facebook.com/lakshyaone", 
+    href: "https://www.facebook.com/lakshyaoneofficial/",
   },
   {
     icon: Instagram,
     label: "Instagram",
-    href: "https://instagram.com/lakshyaone_"
+    href: "https://www.instagram.com/lakshyaone_/",
+  },
+  {
+    icon: Linkedin,
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/company/lakshya-one/",
   },
 ];
 
@@ -70,9 +75,9 @@ export default function ContactPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.label}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-200 text-black text-blue-600 transition-colors hover:bg-blue-600 hover:text-white"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-200 text-blue-600 transition-colors hover:bg-blue-600 hover:text-white"
                 >
-                  <social.icon className="w-6 h-6" />
+                  <social.icon className="w-5 h-5" />
                 </a>
               ))}
             </div>

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Mail, MapPin } from "lucide-react";
+import { Mail, MapPin, Facebook, Instagram, Linkedin } from "lucide-react";
 
 const FOOTER_LINKS = [
   { href: "/schools", label: "Browse schools" },
@@ -14,6 +14,12 @@ const LEGAL_LINKS = [
   { href: "/terms", label: "Terms of Service" },
   { href: "/privacy", label: "Privacy Policy" },
   { href: "/disclaimer", label: "Data Disclaimer" },
+];
+
+const SOCIAL_LINKS = [
+  { href: "https://www.facebook.com/lakshyaoneofficial/", label: "Facebook", icon: Facebook },
+  { href: "https://www.instagram.com/lakshyaone_/", label: "Instagram", icon: Instagram },
+  { href: "https://www.linkedin.com/company/lakshya-one/", label: "LinkedIn", icon: Linkedin },
 ];
 
 export default function Footer() {
@@ -40,6 +46,22 @@ export default function Footer() {
               find the right school and helping schools build a stronger digital
               presence.
             </p>
+
+            <ul className="flex items-center gap-3 pt-1">
+              {SOCIAL_LINKS.map(({ href, label, icon: Icon }) => (
+                <li key={label}>
+                  <Link
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-blue-700 text-blue-200 transition-colors hover:border-amber-400 hover:bg-amber-400 hover:text-blue-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+                  >
+                    <Icon className="h-4 w-4" aria-hidden />
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
 
           <nav aria-label="Footer navigation">
