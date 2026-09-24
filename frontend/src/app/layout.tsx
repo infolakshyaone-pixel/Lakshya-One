@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google"; // 1. import add karo
 import "./globals.css";
 import Providers from "./providers";
 import Navbar from "@/components/shared/layout/Navbar";
@@ -41,6 +42,10 @@ export default function RootLayout({
           </HideOnAdminLogin>
         </Providers>
       </body>
+      {/* 2. body ke baad, </html> se pehle */}
+      {process.env.NODE_ENV === "production" && (
+        <GoogleAnalytics gaId="G-M353L1LPYY" />
+      )}
     </html>
   );
 }
