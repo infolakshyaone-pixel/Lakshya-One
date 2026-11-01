@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import { GoogleTagManager } from "@next/third-parties/google";
@@ -6,6 +7,7 @@ import Providers from "./providers";
 import Navbar from "@/components/shared/layout/Navbar";
 import Footer from "@/components/shared/layout/Footer";
 import HideOnAdminLogin from "@/components/shared/layout/HideOnAdminLogin";
+import MetaPixel from "@/components/analytics/MetaPixel";
 import { rootMetadata } from "@/lib/seo/seo";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -34,6 +36,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${plusJakartaSans.variable} ${inter.variable}`}>
       <body className="bg-gray-50 text-gray-900 font-body antialiased min-h-screen flex flex-col">
+        <MetaPixel />
+
         <Providers>
           <Navbar />
           <main className="flex-1">{children}</main>
@@ -42,6 +46,7 @@ export default function RootLayout({
           </HideOnAdminLogin>
         </Providers>
       </body>
+
       {process.env.NODE_ENV === "production" && (
         <GoogleTagManager gtmId="GTM-K84NRBTL" />
       )}
